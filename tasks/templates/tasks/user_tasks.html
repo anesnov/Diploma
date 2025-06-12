@@ -1,5 +1,6 @@
 {% extends "homepage/page_template.html" %}
 {% block content %}
+
     <h1 class="mb-3">Задачи пользователю {{ view.kwargs.username }} ({{ page_obj.paginator.count }})</h1>
     {% for task in tasks %}
         <article class="media content-section">
@@ -21,9 +22,9 @@
                 {% endif %}
                 <a class="btn btn-danger btn-sm mb-10" href="{% url 'task-delete' task.id %}" style="float: right">Удалить</a>
                 {% if not task.done %}
-                    <a class="btn btn-warning btn-sm mb-10" href="{% url 'task-complete' task.id %}" style="float: right">Выполнить</a>
+                    <a class="btn btn-warning btn-sm mb-10" href="{% url 'task-complete' task.id %}?next={{ request.get_full_path |urlencode }}" style="float: right">Выполнить</a>
                 {% else %}
-                    <a class="btn btn-warning btn-sm mb-10" href="{% url 'task-uncomplete' task.id %}" style="float: right">Отменить выполнение</a>
+                    <a class="btn btn-warning btn-sm mb-10" href="{% url 'task-uncomplete' task.id %}?next={{ request.get_full_path |urlencode }}" style="float: right">Отменить выполнение</a>
                 {% endif %}
               {% endif %}
             </div>
@@ -37,21 +38,21 @@
     {% if is_paginated %}
 
       {% if page_obj.has_previous %}
-        <a class="btn btn-outline-info mb-4 mr-1" href="?page=1">Первая</a>
-        <a class="btn btn-outline-info mb-4 mr-1" href="?page={{ page_obj.previous_page_number }}">Предыдущая</a>
+        <a class="btn btn-outline-info mb-4 mr-1" href="?page=1&{{ filter_url }}">Первая</a>
+        <a class="btn btn-outline-info mb-4 mr-1" href="?page={{ page_obj.previous_page_number }}&{{ filter_url }}">Предыдущая</a>
       {% endif %}
 
       {% for num in page_obj.paginator.page_range %}
         {% if page_obj.number == num %}
-          <a class="btn btn-info mb-4 mr-1" href="?page={{ num }}">{{ num }}</a>
+          <a class="btn btn-info mb-4 mr-1" href="?page={{ num }}&{{ filter_url }}">{{ num }}</a>
         {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-          <a class="btn btn-outline-info mb-4 mr-1" href="?page={{ num }}">{{ num }}</a>
+          <a class="btn btn-outline-info mb-4 mr-1" href="?page={{ num }}&{{ filter_url }}">{{ num }}</a>
         {% endif %}
       {% endfor %}
 
       {% if page_obj.has_next %}
-        <a class="btn btn-outline-info mb-4 mr-1" href="?page={{ page_obj.next_page_number }}">Следующая</a>
-        <a class="btn btn-outline-info mb-4 mr-1" href="?page={{ page_obj.paginator.num_pages }}">Последняя</a>
+        <a class="btn btn-outline-info mb-4 mr-1" href="?page={{ page_obj.next_page_number }}&{{ filter_url }}">Следующая</a>
+        <a class="btn btn-outline-info mb-4 mr-1" href="?page={{ page_obj.paginator.num_pages }}&{{ filter_url }}">Последняя</a>
       {% endif %}
 
     {% endif %}

@@ -31,8 +31,8 @@
                       <button class="dropbtn" style="background-color:transparent"><a class="nav-item nav-link" href="{% url 'profile' %}">Профиль</a></button>
                       <div class="dropdown-content">
                         <a href="{% url 'user-posts' user.username %}">Ответы</a>
-                        <a href="{% url 'user-tasks' user.username %}">Полученные задачи</a>
-                        <a href="{% url 'user-tasks' user.username %}">Отправленыне задачи</a>
+                        <a href="{% url 'user-tasks' user.username %}?filter=incoming">Полученные задачи</a>
+                        <a href="{% url 'user-tasks' user.username %}?filter=outgoing">Отправленыне задачи</a>
                       </div>
                     </div>
                     <a class="nav-link" href="{% url 'notification_list' %}">Уведомления</a>

@@ -34,13 +34,13 @@ class TaskCreateView(LoginRequiredMixin, CreateView):
         form.instance.to_user = receiver
         form.instance.date_created = timezone.now()
         check = self.request.POST.get('urgent_check')
-        print(check)
+        # print(check)
         if check == "on":
-            print("Checked")
+            # print("Checked")
             form.instance.is_urgent = True
-            print(form.instance.id)
+            # print(form.instance.id)
         task = form.save()
-        print(task.id)
+        # print(task.id)
         notify.send(form.instance.from_user, recipient=receiver, verb='назначил(а) Вам задание.', action_object=task)
         return super().form_valid(form)
 
@@ -73,12 +73,53 @@ class UserTaskListView(ListView):
     context_object_name = 'tasks'
     paginate_by = 20
 
+    def get_context_data(self, **kwargs):
+        context = super(UserTaskListView, self).get_context_data(**kwargs)
+        filter = self.request.GET.get('filter' or None)
+        print(filter)
+        if self.request.GET.get("filter") == "incoming":
+            context['filter'] = 1
+            context['filter_url'] = "filter=incoming"
+        elif self.request.GET.get("filter") == "outgoing":
+            context['filter'] = 2
+            context['filter_url'] = "filter=outgoing"
+        else:
+            context['filter'] = 0
+
+        return context
+
     def get_queryset(self):
         user = get_object_or_404(User, username=self.kwargs.get('username'))
         giver = self.request.user
-        if (user == giver):
-            return Task.objects.filter(to_user=user).order_by('-date_created')
-        return Task.objects.filter(from_user=giver, to_user=user).order_by('-date_created')
+        filters = {}
+        if self.request.GET.get("filter") == "incoming":
+            if (user == giver):
+                filters['to_user'] = giver
+            else:
+                filters['from_user'] = giver
+                filters['to_user'] = user
+
+        elif self.request.GET.get("filter") == "outgoing":
+            if (user == giver):
+                filters['from_user'] = giver
+            else:
+                filters['to_user'] = giver
+                filters['from_user'] = user
+        # if self.request.GET.get("filter") == "incoming":
+        #
+        #     if (user == giver):
+        #
+        #         return Task.objects.filter(to_user=giver).order_by('-date_created')
+        #     return Task.objects.filter(from_user=giver, to_user=user).order_by('-date_created')
+        #
+        # elif self.request.GET.get("filter") == "outgoing":
+        #     if (user == giver):
+        #         return Task.objects.filter(from_user=giver).order_by('-date_created')
+        #     return Task.objects.filter(to_user=giver, from_user=user).order_by('-date_created')
+
+        # if (user == giver):
+        #     return Task.objects.filter(to_user=user).order_by('-date_created')
+        return Task.objects.filter(**filters).order_by('-date_created')
 
 
 class TaskDetailView(DetailView):
@@ -92,7 +133,8 @@ def task_complete(request, *args, **kwargs):
 
     task.done = True
     task.save()
-    return redirect('user-tasks', username=task.to_user.username)
+    return redirect(request.GET.get('next'))
+    # return redirect('user-tasks', username=task.to_user.username)
 
 @login_required
 def task_uncomplete(request, *args, **kwargs):
@@ -101,7 +143,8 @@ def task_uncomplete(request, *args, **kwargs):
 
     task.done = False
     task.save()
-    return redirect('user-tasks', username=task.to_user.username)
+    return redirect(request.GET.get('next'))
+    #return redirect('user-tasks', username=task.to_user.username)
 
 
 class TaskViewSet(viewsets.ModelViewSet):
