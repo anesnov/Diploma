@@ -22,10 +22,8 @@
         <div class="reply-profile">
             <img class="rounded-circle reply-img" src="{{ reply.author.profile.image.url }}"><br>
             <a class="article-title" href="{% url 'user-posts' reply.author.username %}">{{ reply.author.profile.last_name }} {{ reply.author.profile.first_name }}</a><br>
-
-
-
         </div>
+
 {#        style="justify-self: start;"#}
         <div class="reply-content" >
             <div class="" style="border-bottom: 1px solid gray;">

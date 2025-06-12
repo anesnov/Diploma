@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 import asyncio
 
 from typing import AsyncGenerator
@@ -58,7 +58,7 @@ def create_message(request: HttpRequest, **kwargs) -> HttpResponse:
 
     author = get_object_or_404(User, username=author)
     recipient = get_object_or_404(User, username=recipient)
-
+    #created_at = datetime.datetime.now()
 
     if content:
         msg = models.Message.objects.create(author=author, recipient=recipient, content=content)
@@ -85,11 +85,12 @@ async def stream_chat_messages(request: HttpRequest, *args, **kwargs) -> Streami
 
         # Continuously check for new messages
         while True:
+
             new_messages = models.Message.objects.filter(Q(author=author, recipient=recipient, id__gt=last_id) | Q(author=recipient, recipient=author, id__gt=last_id)).order_by('created_at').values(
-                'id', 'author__profile__last_name', 'author__profile__first_name',  'content'
+                'id', 'author__profile__last_name', 'author__profile__first_name',  'content', 'created_at'
             )
             async for message in new_messages:
-                yield f"data: {json.dumps(message)}\n\n"
+                yield f"data: {json.dumps(message, default=default)}\n\n"
                 last_id = message['id']
             await asyncio.sleep(1)  # Adjust sleep time as needed to reduce db queries.
 
@@ -97,10 +98,10 @@ async def stream_chat_messages(request: HttpRequest, *args, **kwargs) -> Streami
         author = await get_author()
         recipient = await get_recipient()
         messages = models.Message.objects.filter(Q(author=author, recipient=recipient) | Q(author=recipient, recipient=author)).order_by('created_at').values( #author=request.session.get('author'), recipient=request.session.get('recipient')
-            'id', 'author__profile__last_name', 'author__profile__first_name', 'content'
+            'id', 'author__profile__last_name', 'author__profile__first_name', 'content', 'created_at'
         )
         async for message in messages:
-            yield f"data: {json.dumps(message)}\n\n"
+            yield f"data: {json.dumps(message, default=default)}\n\n"
 
     async def get_last_message_id() -> int:
         author = await get_author()
@@ -120,5 +121,9 @@ async def stream_chat_messages(request: HttpRequest, *args, **kwargs) -> Streami
         rec = await sync_to_async(models.User.objects.filter)(username=user)
         ret = await sync_to_async(rec.first)()
         return ret
+
+    def default(o):
+        if isinstance(o, (datetime.date, datetime.datetime)):
+            return o.isoformat() #"#", "minutes"
 
     return StreamingHttpResponse(event_stream(), content_type='text/event-stream')
