@@ -1,0 +1,30 @@
+{% extends 'homepage/page_template.html' %}
+{% block content %}
+
+    {% for post in posts %}
+        <article class="media content-section">
+          <div class="media-body">
+            <div class="article-metadata">
+                <img class="rounded-circle article-img" src="{{ post.author.profile.image.url }}">
+              <a class="article-title" href="{% url 'user-posts' post.author.username %}">{{ post.author.profile.last_name }} {{ post.author.profile.first_name }}</a>
+              <small class="text-muted">{{ post.date_created|date:"F d, Y" }}</small>
+            </div>
+
+            <div style="border-bottom: 1px solid lightgray;">
+                <h4><a class="article-title" href="{% url 'post-detail' post.id %}">{{ post.title }}</a></h4>
+                {% if post.count > 0 %}
+                    <h6><span>Ответов: {{ post.count }}</span> <span>Последний: {{ post.last_reply }}</span> </h6>
+                {% else %}
+                    <h6>В этой теме ещё нет ответов.</h6>
+                {% endif %}
+            </div>
+
+            <p class="article-content">{{ post.content|safe }}</p>
+          </div>
+        </article>
+    {% endfor %}
+    {% if replies.count > 0 %}
+        <p>{{ replies.0.post.title }}</p>
+    {% endif %}
+
+{% endblock content %}

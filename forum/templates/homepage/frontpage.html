@@ -1,0 +1,25 @@
+{% extends 'homepage/page_template.html' %}
+{% load crispy_forms_tags %}
+{% block content %}
+    {% if messages %}
+        	{% for message in messages %}
+          	<div class="alert alert-{{ message.tags }}">
+            	{{ message }}
+          	</div>
+        	{% endfor %}
+    {% endif %}
+
+    <a href="{% url 'register' %}"><button class="btn btn-success" >  <i class="fa-solid fa-plus"></i> Регистрация  </button></a>
+    <div class="offset-md-0 col-md-0">
+                <p class="text-center">
+                    <button
+                        data-hx-get="{% url 'login' %}"
+                        data-hx-target="main"
+                        data-hx-swap="beforeend"
+                        type="button"
+                        class="btn btn-primary"
+                    >Log in</button>
+                </p>
+            </div>
+
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends 'homepage/page_template.html' %}
+{% block content %}
+    {% for department in departments  %}
+        {% if department.is_director %}
+            <h2>{{ department.name }}</h2>
+            {% for director in users  %}
+                {% if director.department == department %}
+                <article class="media content-section">
+                  <div class="media-body">
+                    <h4><a class="article-title" href="{% url 'user-posts' director.user.username %}">{{ director.last_name }} {{ director.first_name }} {{ director.middle_name }}</a></h4>
+                  </div>
+                </article>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    {% endfor %}
+    {% for department in departments %}
+        {% if not department.is_director %}
+            <h2>{{ department.name }}</h2>
+            {% for user in users %}
+                {% if user.department == department %}
+                    <article class="media content-section">
+                      <div class="media-body">
+                          {% if user.position.is_head %}
+                              <h4>Руководитель отдела</h4>
+                          {% endif %}
+                        <h4><a class="article-title" href="{% url 'user-posts' user.user.username %}">{{ user.last_name }} {{ user.first_name }} {{ user.middle_name }}</a></h4>
+                      </div>
+                    </article>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    {% endfor %}
+    
+{% endblock content %}

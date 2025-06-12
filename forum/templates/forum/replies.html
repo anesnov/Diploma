@@ -1,0 +1,72 @@
+{% extends 'homepage/page_template.html' %}
+{% block content %}
+
+<article class="media content-section">
+    <div class="article-metadata">
+        <h3>{{ post.title }}</h3>
+    </div>
+    <h4>{{ post.content }}</h4>
+</article>
+{% if not replies %}
+    <div class="content-section">
+        <h5>В обсуждении пока пусто...</h5>
+    </div>
+{% endif %}
+<div class="flex-row" style="background: transparent; margin-bottom: 20px;">
+    <a class="btn btn-success" style="margin-top: 10px; float: right;" href="{% url 'reply-create' post.id %}">Написать в тему</a>
+</div>
+{%  for reply in replies %}
+    <!--article class="media content-section">
+   </article-->
+    <div class="flex-row">
+        <div class="reply-profile">
+            <img class="rounded-circle reply-img" src="{{ reply.author.profile.image.url }}"><br>
+            <a class="article-title" href="{% url 'user-posts' reply.author.username %}">{{ reply.author.profile.last_name }} {{ reply.author.profile.first_name }}</a><br>
+
+
+
+        </div>
+{#        style="justify-self: start;"#}
+        <div class="reply-content" >
+            <div class="" style="border-bottom: 1px solid gray;">
+                <small class="text-muted">{{ reply.date_posted|date:"d.m.Y h:m" }}</small>
+                <a class="btn btn-success btn-sm mb-2" style="margin-top: 10px" href="#">Ответить</a>
+            </div>
+            <p style="font-size: 18px">{{ reply.reply|safe }}</p>
+            {% if reply.attachments %}
+                <div class="attachments" style="border-top: 1px solid lightgray;">
+                    <span>Вложения:</span><br>
+                    <img class="" src="{{ reply.attachments.url }}" onerror="this.onerror=null; this.src='https://pngimg.com/uploads/folder/folder_PNG8773.png'" width="120px" height="120px">
+                    <br>
+                    <a href="{{ reply.attachments.url }}"  class="article-title"> {{ reply.attachments.name }}</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endfor %}
+
+<div class="pagination justify-content-center">
+    {% if is_paginated %}
+
+      {% if page_obj.has_previous %}
+
+        <a class="btn btn-outline-info mb-4 mr-1" href="?page=1">Первая</a>
+        <a class="btn btn-outline-info mb-4 mr-1" href="?page={{ page_obj.previous_page_number }}">Предыдущая</a>
+      {% endif %}
+
+      {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+          <a class="btn btn-info mb-4 mr-1" href="?page={{ num }}">{{ num }}</a>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+          <a class="btn btn-outline-info mb-4 mr-1" href="?page={{ num }}">{{ num }}</a>
+        {% endif %}
+      {% endfor %}
+
+      {% if page_obj.has_next %}
+        <a class="btn btn-outline-info mb-4 mr-1" href="?page={{ page_obj.next_page_number }}">Следующая</a>
+        <a class="btn btn-outline-info mb-4 mr-1" href="?page={{ page_obj.paginator.num_pages }}">Последняя</a>
+      {% endif %}
+
+    {% endif %}
+  </div>
+{% endblock %}

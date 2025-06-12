@@ -1,0 +1,24 @@
+{% extends 'homepage/page_template.html' %}
+{% block content %}
+    {% for theme in themes %}
+        <div class="content-section">
+            <span style="font-size: 28px;">{{ theme.name }}</span>
+            {% if user.is_staff %}
+                <a class="btn btn-sm mb-10" href="{% url 'post-delete' theme.id %}" style="float: right">Новая тема</a>
+                <!--a class="btn btn-sm mb-10" href="{% url 'post-delete' theme.id %}" style="float: right">Удалить</a-->
+            {% endif %}
+            {% for section in sections %}
+                {% if theme.id == section.theme.id %}
+                      <div class="media-body" style="border-top: 1px solid #cccccc; padding-left: 12px;">
+                        <a class="article-title" href="{% url 'section' section.id %}" style="font-size: 22px;">{{ section.name }}</a>
+                        {# if user.is_staff #}
+                            <!--a class="btn btn-sm mb-10" href="{% url 'post-delete' section.id %}" style="float: right">Удалить</a-->
+                        {# endif #}
+                      </div>
+                {% endif %}
+            {% endfor %}
+
+        </div>
+    {% endfor %}
+    
+{% endblock content %}
