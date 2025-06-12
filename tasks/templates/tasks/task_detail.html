@@ -1,0 +1,30 @@
+{% extends "homepage/page_template.html" %}
+{% block content %}
+  <article class="media content-section">
+
+    <div class="media-body">
+
+      <div class="article-metadata">
+        <img class="rounded-circle article-img" src="{{ object.from_user.profile.image.url }}">
+        <a class="mr-2" href="{% url 'user-tasks' object.to_user.username %}">{{ object.to_user }}</a>
+        <small class="text-muted">{{ object.date_created|date:"F d, Y" }}</small>
+      </div>
+
+      <h2 class="article-title">{{ object.title }}</h2>
+      <p class="article-content">{{ object.description }}</p>
+      {% if object.from_user == user or object.to_user == user %}
+        <div>
+          {% if not task.done %}
+              <a class="btn btn-warning btn-sm mt-1 mb-10" href="{% url 'task-complete' task.id %}">Выполнить</a>
+          {% else %}
+              <a class="btn btn-warning btn-sm mt-1 mb-10" href="{% url 'task-uncomplete' task.id %}">Отменить выполнение</a>
+          {% endif %}
+          {% if task.from_user == user %}
+            <a class="btn btn-secondary btn-sm mt-1 mb-10" href="{% url 'task-update' object.id %}">Редактировать</a>
+          {% endif %}
+          <a class="btn btn-danger btn-sm mt-1 mb-10" href="{% url 'task-delete' object.id %}">Удалить</a>
+        </div>
+      {% endif %}
+    </div>
+  </article>
+{% endblock content %}

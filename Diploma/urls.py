@@ -15,8 +15,21 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.template.defaulttags import url
+from django.urls import path, include
+from django.conf.urls.static import static
+from django.conf import settings
+from rest_framework.authtoken.views import obtain_auth_token
+from forum.views import notification_view, read_all_notifications
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', include('forum.urls')),
+    path('api-token-auth/', obtain_auth_token),
+    path('inbox/notifications/', include('notifications.urls', namespace='notifications')),
+    path('notifications/', notification_view, name='notification_list'),
+    path('notifications/read_all', read_all_notifications, name='read_all_notifications'),
 ]
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
