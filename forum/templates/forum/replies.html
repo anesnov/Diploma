@@ -21,18 +21,28 @@
     <div class="flex-row">
         <div class="reply-profile">
             <img class="rounded-circle reply-img" src="{{ reply.author.profile.image.url }}"><br>
-            <a class="article-title" href="{% url 'user-posts' reply.author.username %}">{{ reply.author.profile.last_name }} {{ reply.author.profile.first_name }}</a><br>
+            <a class="article-title" href="{% url 'profile' reply.author.username %}">{{ reply.author.profile.last_name }} {{ reply.author.profile.first_name }}</a><br>
+            <a class="btn btn-success btn-sm mb-1" style="margin-top: 10px" href="{% url 'reply-create' post.id  %}?reply_to={{ reply.id }}">Ответить</a>
         </div>
 
 {#        style="justify-self: start;"#}
-        <div class="reply-content" >
-            <div class="" style="border-bottom: 1px solid gray;">
+        <div class="reply-content" style="display: flex; flex-direction: column; width: 100%; margin-right: 10px;" >
+            <div class="" style="border-bottom: 1px solid gray; display: flex; flex-direction: column;">
                 <small class="text-muted">{{ reply.date_posted|date:"d.m.Y h:m" }}</small>
-                <a class="btn btn-success btn-sm mb-2" style="margin-top: 10px" href="#">Ответить</a>
             </div>
-            <p style="font-size: 18px">{{ reply.reply|safe }}</p>
+            <div class="" style="display: flex; flex-direction: column;">
+            {% if reply.reply_to %}
+                <div class="reply-content" style="border: 2px solid grey; border-radius: 10px; background: #ffffff; display: flex; flex-direction: column;">
+                    <strong style="background: #eff1f2; border-bottom: 1px solid #3d4449; border-radius: 9px; padding-left: 5px">{{ reply.reply_to.author.profile.last_name }} {{ reply.reply_to.author.profile.first_name }} написал(а):</strong><br>
+                    <p style="margin-bottom: 5px">{{ reply.reply_to.reply }}</p>
+                </div>
+            {% endif %}
+
+            <p style="font-size: 18px; margin-top: 5px">{{ reply.reply|safe }}</p>
+            </div>
+
             {% if reply.attachments %}
-                <div class="attachments" style="border-top: 1px solid lightgray;">
+                <div class="attachments" style="border-top: 1px solid lightgray; display: flex; flex-direction: column;">
                     <span>Вложения:</span><br>
                     <img class="" src="{{ reply.attachments.url }}" onerror="this.onerror=null; this.src='https://pngimg.com/uploads/folder/folder_PNG8773.png'" width="120px" height="120px">
                     <br>

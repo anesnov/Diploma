@@ -1,0 +1,45 @@
+{% extends "homepage/page_template.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <h1> Ответ </h1>
+    {% if reply %}
+        <div class="flex-row">
+            <div class="reply-profile">
+                <img class="rounded-circle reply-img" src="{{ reply.author.profile.image.url }}"><br>
+                <a class="article-title" href="{% url 'profile' reply.author.username %}">{{ reply.author.profile.last_name }} {{ reply.author.profile.first_name }}</a>
+            </div>
+
+    {#        style="justify-self: start;"#}
+            <div class="reply-content" >
+                <div class="" style="border-bottom: 1px solid gray;">
+                    <small class="text-muted">{{ reply.date_posted|date:"d.m.Y h:m" }}</small>
+
+                </div>
+                <p style="font-size: 18px">{{ reply.reply|safe }}</p>
+                {% if reply.attachments %}
+                    <div class="attachments" style="border-top: 1px solid lightgray;">
+                        <span>Вложения:</span><br>
+                        <img class="" src="{{ reply.attachments.url }}" onerror="this.onerror=null; this.src='https://pngimg.com/uploads/folder/folder_PNG8773.png'" width="120px" height="120px">
+                        <br>
+                        <a href="{{ reply.attachments.url }}"  class="article-title"> {{ reply.attachments.name }}</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+    <div class="features data">
+
+        <form method="post">
+            {% csrf_token %}
+            <br>
+            {{ form.reply }}<br>
+            {{ form.attachments }}<br>
+
+            {% if error %}
+                <span> {{ error }} </span>
+            {% endif %}
+
+            <button class="btn btn-success" type="submit"> Сохранить данные </button>
+        </form>
+    </div>
+{% endblock content %}

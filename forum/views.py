@@ -4,6 +4,7 @@ from django.db.models import Count
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.template.context_processors import request
+from notifications.signals import notify
 
 from login_modal.forms import SearchForm
 from django.shortcuts import render, get_object_or_404
@@ -217,13 +218,25 @@ def replies(request, *args, **kwargs):
 
 class RepliesCreateView(LoginRequiredMixin, CreateView):
     model = Replies
-    template_name = 'forum/reply.html'
+    template_name = 'forum/reply_form.html'
     context_object_name = 'replies'
     form_class = ReplyForm
+
+    def get_context_data(self, **kwargs):
+        context = super(RepliesCreateView, self).get_context_data(**kwargs)
+        context['reply'] = get_object_or_404(Replies, id=self.request.GET.get('reply_to' or None))
+        return context
+
     def form_valid(self, form):
         form.instance.post_id = self.kwargs.get('pk')
         form.instance.author = self.request.user
         form.instance.date_posted = timezone.now()
+        reply_to = self.request.GET.get('reply_to' or None)
+        if reply_to is not None:
+            form.instance.reply_to = get_object_or_404(Replies, id=reply_to)
+            notify.send()
+        if form.instance.reply_to.post.id != form.instance.post_id:
+            return redirect('post-detail', pk=form.instance.post_id)
         #form.instance.attachments = self.request.POST.get('attachments')
         return super().form_valid(form)
 
