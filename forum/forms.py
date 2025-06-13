@@ -14,7 +14,7 @@ class SectionThemeForm(ModelForm):
             }),
             "priority": NumberInput(attrs={
                 'class': 'form-control',
-                'placeholder': 1
+                'placeholder': 10
             })
         }
 

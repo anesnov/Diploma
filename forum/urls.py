@@ -17,13 +17,12 @@ from .views import (
     PostDeleteView,
     UserPostListView,
     RepliesListView,
-    sections, RepliesCreateView, replies
+    sections, RepliesCreateView, replies, SectionCreateView, SectionThemeCreateView
 )
 
 urlpatterns = [
     #path('',  PostListView.as_view(), name='home'), #views.index
     path('',  sections, name='home'),
-    path('section/<int:pk>/', PostListView.as_view(), name='section'),
     path('about', views.about, name='about'),
     path('company/', structure, name='company'),
     path("user/", login_modal_views.profile_update, name="profile"),
@@ -36,8 +35,8 @@ urlpatterns = [
     path('user/<str:username>/update/', profile_update, name='profile-update'),
     path('user/<str:username>/posts/', UserPostListView.as_view(), name='user-posts'),
 
-    path('user/<str:username>/promote_to_staff', views.promote, name="promote_to_staff"),
-    path('user/<str:username>/demote_staff', views.demote, name="demote_staff"),
+    path('user/<str:username>/promote_to_staff', login_modal_views.promote, name="promote_to_staff"),
+    path('user/<str:username>/demote_staff', login_modal_views.demote, name="demote_staff"),
 
     path('user/<str:username>/dm/', chat.views.chat, name='chat'),
     path('user/<str:username>/dm/create-message/', chat.views.create_message, name='create-message'),
@@ -51,8 +50,10 @@ urlpatterns = [
     path('tasks/<int:pk>/complete', task_complete, name='task-complete'),
     path('tasks/<int:pk>/uncomplete', task_uncomplete, name='task-uncomplete'),
 
-
-    path('post/new/', PostCreateView.as_view(), name='post-create'),
+    path('theme/new/', SectionThemeCreateView.as_view(), name='theme-create'),
+    path('theme/<int:pk>/new_section/', SectionCreateView.as_view(), name='section-create'),
+    path('section/<int:pk>/', PostListView.as_view(), name='section'),
+    path('section/<int:pk>//new/', PostCreateView.as_view(), name='post-create'),
     path('post/<int:pk>/', replies, name='post-detail'),
     path('post/<int:pk>/reply/', RepliesCreateView.as_view(), name='reply-create'),
     path('post/<int:pk>/update/', PostUpdateView.as_view(), name='post-update'),

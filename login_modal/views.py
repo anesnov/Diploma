@@ -83,3 +83,20 @@ def profile_view(request, *args, **kwargs):
     profile = user.profile
 
     return render(request, 'profile_detail.html', {'profile': profile, 'user':user})
+
+
+def promote(request, *args, **kwargs):
+    if request.user.is_superuser:
+        # print(kwargs.get('username'))
+        user = get_object_or_404(User, username=kwargs.get('username'))
+        user.is_staff = True
+        user.save()
+    return redirect('user-posts', username=kwargs.get('username'))
+
+def demote(request, *args, **kwargs):
+    if request.user.is_superuser:
+        # print(kwargs.get('username'))
+        user = get_object_or_404(User, username=kwargs.get('username'))
+        user.is_staff = False
+        user.save()
+    return redirect('user-posts', username=kwargs.get('username'))

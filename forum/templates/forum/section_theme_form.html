@@ -1,0 +1,18 @@
+{% extends "homepage/page_template.html" %}
+{% block content %}
+    <div class="features data">
+        <h1> Создание тематики разделов  </h1>
+        <form method="post">
+            {% csrf_token %}
+            <br>
+            {{ form.name }}<br>
+            {{ form.priority }}<br>
+
+            {% if error %}
+                <span> {{ error }} </span>
+            {% endif %}
+
+            <button class="btn btn-success" type="submit"> Сохранить данные </button>
+        </form>
+    </div>
+{% endblock content %}

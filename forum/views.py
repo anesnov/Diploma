@@ -17,7 +17,7 @@ from django.views.generic import (
     DeleteView
 )
 
-from .forms import PostForm, ReplyForm
+from .forms import PostForm, ReplyForm, SectionForm, SectionThemeForm
 from .models import *
 from notifications.models import Notification
 from notifications.views import AllNotificationsList
@@ -25,6 +25,9 @@ from django.contrib.contenttypes.models import ContentType
 import chat.models
 
 
+"""
+Оповещения
+"""
 def notification_view(request):
     if request.user.is_authenticated:
         user = request.user
@@ -45,54 +48,62 @@ def read_all_notifications(request):
         Notification.objects.mark_all_as_read(recipient=request.user)
     return redirect('notification_list')
 
-def promote(request, *args, **kwargs):
-    if request.user.is_superuser:
-        # print(kwargs.get('username'))
-        user = get_object_or_404(User, username=kwargs.get('username'))
-        user.is_staff = True
-        user.save()
-    return redirect('user-posts', username=kwargs.get('username'))
-
-def demote(request, *args, **kwargs):
-    if request.user.is_superuser:
-        # print(kwargs.get('username'))
-        user = get_object_or_404(User, username=kwargs.get('username'))
-        user.is_staff = False
-        user.save()
-    return redirect('user-posts', username=kwargs.get('username'))
-
-
-# Create your views here.
-def index(request):
-    if request.user.is_authenticated:
-        context = {
-            'posts': Post.objects.all()
-        }
-        return render(request, 'forum/forum.html', context)
-    if request.GET:
-        form = SearchForm(data=request.GET, prefix="search")
-        if form.is_valid():
-            pass
-    else:
-        form = SearchForm(data=request.GET, prefix="search")
-    request.combined_media = form.media
-    context = {
-        "form": form,
-    }
-    return render(request, "homepage/frontpage.html", context)
+# def index(request):
+#     if request.user.is_authenticated:
+#         context = {
+#             'posts': Post.objects.all()
+#         }
+#         return render(request, 'forum/section_posts.html', context)
+#     if request.GET:
+#         form = SearchForm(data=request.GET, prefix="search")
+#         if form.is_valid():
+#             pass
+#     else:
+#         form = SearchForm(data=request.GET, prefix="search")
+#     request.combined_media = form.media
+#     context = {
+#         "form": form,
+#     }
+#     return render(request, "homepage/frontpage.html", context)
 
 def about(request):
     return render(request, 'homepage/about.html')
 
+"""
+Разделы
+"""
 def sections(request):
     themes = SectionTheme.objects.all().order_by('priority')
     sections = Section.objects.all()
 
-    return render(request, 'forum/discussions.html', {'themes': themes, 'sections': sections})
+    return render(request, 'forum/sections.html', {'themes': themes, 'sections': sections})
+
+class SectionCreateView(LoginRequiredMixin, CreateView):
+    model = Section
+    template_name = 'forum/section_form.html'
+    context_object_name = 'section'
+    form_class = SectionForm
+    success_url = '/'
+
+    def form_valid(self, form):
+        form.instance.theme = get_object_or_404(SectionTheme, id=self.kwargs.get('pk'))
+        return super().form_valid(form)
+
+class SectionThemeCreateView(LoginRequiredMixin, CreateView):
+    model = SectionTheme
+    template_name = 'forum/section_theme_form.html'
+    context_object_name = 'section_theme'
+    form_class = SectionThemeForm
+    success_url = '/'
+
+
+"""
+Обсуждения
+"""
 
 class PostListView(ListView):
     model = Post
-    template_name = 'forum/forum.html'
+    template_name = 'forum/section_posts.html'
     context_object_name = 'posts'
     ordering = ['-date_created']
     paginate_by = 5
@@ -174,6 +185,11 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
             return True
         return False
 
+
+
+"""
+Ответы
+"""
 
 class RepliesListView(ListView):
     model = Replies

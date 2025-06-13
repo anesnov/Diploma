@@ -4,7 +4,7 @@
         <div class="content-section">
             <span style="font-size: 28px;">{{ theme.name }}</span>
             {% if user.is_staff %}
-                <a class="btn btn-sm mb-10" href="{% url 'post-delete' theme.id %}" style="float: right">Новая тема</a>
+                <a class="btn btn-sm mb-10" href="{% url 'section-create' theme.id %}" style="float: right">Новый раздел</a>
                 <!--a class="btn btn-sm mb-10" href="{% url 'post-delete' theme.id %}" style="float: right">Удалить</a-->
             {% endif %}
             {% for section in sections %}
@@ -17,8 +17,10 @@
                       </div>
                 {% endif %}
             {% endfor %}
-
         </div>
     {% endfor %}
+    {% if user.is_staff %}
+        <a class="btn btn-primary mt-5" href="{% url 'theme-create'%}" >Новая тема</a>
+    {% endif %}
     
 {% endblock content %}
