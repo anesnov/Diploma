@@ -28,7 +28,7 @@
                     <a class="nav-item nav-link" href="{% url 'company' %}">Сотрудники</a>
 
                     <div class="dropdown">
-                      <button class="dropbtn" style="background-color:transparent"><a class="nav-item nav-link" href="{% url 'profile' %}">Профиль</a></button>
+                      <button class="dropbtn" style="background-color:transparent"><a class="nav-item nav-link" href="{% url 'profile' user.username%}">Профиль</a></button>
                       <div class="dropdown-content">
                         <a href="{% url 'user-posts' user.username %}">Ответы</a>
                         <a href="{% url 'user-tasks' user.username %}?filter=incoming">Полученные задачи</a>

@@ -76,11 +76,11 @@ class UserTaskListView(ListView):
     def get_context_data(self, **kwargs):
         context = super(UserTaskListView, self).get_context_data(**kwargs)
         filter = self.request.GET.get('filter' or None)
-        print(filter)
-        if self.request.GET.get("filter") == "incoming":
+        # print(filter)
+        if filter == "incoming":
             context['filter'] = 1
             context['filter_url'] = "filter=incoming"
-        elif self.request.GET.get("filter") == "outgoing":
+        elif filter == "outgoing":
             context['filter'] = 2
             context['filter_url'] = "filter=outgoing"
         else:
@@ -91,20 +91,30 @@ class UserTaskListView(ListView):
     def get_queryset(self):
         user = get_object_or_404(User, username=self.kwargs.get('username'))
         giver = self.request.user
+        filter = self.request.GET.get('filter')
+        print(filter)
         filters = {}
-        if self.request.GET.get("filter") == "incoming":
+        if filter == "incoming":
             if (user == giver):
+                print("in self")
                 filters['to_user'] = giver
             else:
+                print("in")
                 filters['from_user'] = giver
                 filters['to_user'] = user
 
-        elif self.request.GET.get("filter") == "outgoing":
+        elif filter == "outgoing":
             if (user == giver):
+                print("out self")
                 filters['from_user'] = giver
             else:
-                filters['to_user'] = giver
+                print("out")
                 filters['from_user'] = user
+                filters['to_user'] = giver
+        else:
+            print("without filters")
+            filters['to_user'] = user
+
         # if self.request.GET.get("filter") == "incoming":
         #
         #     if (user == giver):

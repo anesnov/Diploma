@@ -1,6 +1,8 @@
-from django.shortcuts import render, redirect
+from django.contrib.auth.models import User
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.template.defaultfilters import first
+from django.views.generic import DetailView
 from django_htmx.http import HttpResponseClientRefresh
 from .forms import LoginForm, UserRegisterForm
 from django.contrib import messages
@@ -50,7 +52,9 @@ def register(request):
 
 
 @login_required
-def profile(request):
+def profile_update(request, *args, **kwargs):
+    if request.user.username != kwargs.get('username'):
+        return redirect('home')
     if request.method == 'POST':
         u_form = UserUpdateForm(request.POST, instance=request.user)
         p_form = ProfileUpdateForm(request.POST,
@@ -72,3 +76,10 @@ def profile(request):
     }
 
     return render(request, 'profile_update.html', context)
+
+
+def profile_view(request, *args, **kwargs):
+    user = get_object_or_404(User, username=kwargs.get('username'))
+    profile = user.profile
+
+    return render(request, 'profile_detail.html', {'profile': profile, 'user':user})

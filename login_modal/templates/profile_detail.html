@@ -1,22 +1,85 @@
 {% extends "homepage/page_template.html" %}
+
 {% block content %}
-  <article class="media content-section">
-    <img class="rounded-circle article-img" src="{{ object.author.profile.image.url }}">
-    <div class="media-body">
-      <div class="article-metadata">
-        <a class="mr-2" href="{% url 'user-posts' object.author.username %}">{{ object.author }}</a>
-        <small class="text-muted">{{ object.date_posted|date:"F d, Y" }}</small>
-        {% if object.author == user or user.is_superuser %}
-          <div>
-            {% if object.author == user %}
-                <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'post-update' object.id %}">Редактировать</a>
-            {% endif %}
-            <a class="btn btn-danger btn-sm mt-1 mb-1" href="{% url 'post-delete' object.id %}">Удалить</a>
-          </div>
-        {% endif %}
-      </div>
-      <h2 class="article-title">{{ object.title }}</h2>
-      <p class="article-content">{{ object.content }}</p>
+<style>
+    .profile-container {
+        display: flex;
+        gap: 2rem;
+        margin-top: 2rem;
+        align-items: flex-start;
+        background: #eff1f2;
+        padding: 1.5rem;
+        border-radius: 22px;
+    }
+
+    .profile-img {
+        width: 220px;
+        height: 220px;
+        object-fit: cover;
+        border-radius: 12px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .info-block {
+        background-color: #f9f9f9;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        margin-bottom: 1rem;
+        width: 100%;
+    }
+
+    .info-block h3 {
+        margin-top: 0;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 0.5rem;
+        color: #333;
+    }
+
+    .info-pair {
+        margin-bottom: 0.75rem;
+    }
+
+    .info-pair strong {
+        display: inline-block;
+        width: 120px;
+        color: #666;
+    }
+
+    .button-row {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+</style>
+
+<div class="profile-container">
+    <div>
+        <img src="{{ profile.image.url }}" alt="Profile Image" class="profile-img">
     </div>
-  </article>
-{% endblock content %}
+    <div style="flex: 1;">
+        <div class="info-block">
+            <h3>Информация о сотруднике</h3>
+            <div class="info-pair"><strong>ФИО:</strong> {{ profile.last_name }} {{ profile.first_name }} {{ profile.middle_name }}</div>
+            <div class="info-pair"><strong>Должность:</strong> {{ profile.position.name }}</div>
+            <div class="info-pair"><strong>Отдел:</strong> {{ profile.department.name }}</div>
+        </div>
+
+        <div class="info-block">
+            <h3>Контактные данные</h3>
+            <div class="info-pair"><strong>Email:</strong> {{ profile.user.email }}</div>
+            <div class="info-pair"><strong>Телефон:</strong> —</div>
+        </div>
+
+        <div class="button-row">
+            <a class="btn btn-success" href="{% url 'task-create' request.user.username %}" style="margin-right: 5px; margin-top: 5px">Назначить задачу</a>
+            <a class="btn btn-warning" href="{% url 'user-tasks' request.user.username %}" style="margin-right: 5px; margin-top: 5px">Просмотреть задачи</a>
+            <a class="btn btn-info" href="{% url 'chat' request.user.username %}" style="margin-right: 5px; margin-top: 5px">Личные сообщения</a>
+            {% if user.username == request.user.username %}
+                <a class="btn btn-primary" href="{% url 'profile-update' user.username %}" style="margin-right: 5px; margin-top: 5px">Редактировать профиль</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
