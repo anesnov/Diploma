@@ -34,6 +34,8 @@ def notification_view(request):
         user = request.user
         unread_notification_list = Notification.objects.filter(recipient=user, unread=True)
         notification_list = Notification.objects.filter(recipient=user, unread=False)
+        for un in unread_notification_list:
+            print(un.action_object_content_type_id)
         #Notification.objects.mark_all_as_read(recipient=user)
         # for notif in notification_list:
         #     if ContentType.objects.get_for_model(chat.models.Message).id == notif.action_object_content_type.id:
@@ -233,8 +235,9 @@ class RepliesCreateView(LoginRequiredMixin, CreateView):
         form.instance.date_posted = timezone.now()
         reply_to = self.request.GET.get('reply_to' or None)
         if reply_to is not None:
-            form.instance.reply_to = get_object_or_404(Replies, id=reply_to)
-            notify.send()
+            reply = get_object_or_404(Replies, id=reply_to)
+            form.instance.reply_to = reply
+            notify.send(self.request.user, recipient=reply.author, verb="ответил(а) на Ваше сообщение в обсуждении.", action_object=reply.post)
         if form.instance.reply_to.post.id != form.instance.post_id:
             return redirect('post-detail', pk=form.instance.post_id)
         #form.instance.attachments = self.request.POST.get('attachments')

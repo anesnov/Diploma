@@ -7,7 +7,13 @@
             {% for notification in unread_notification_list %}
                 <p style="border-bottom: 1px solid lightgray;">
                     {{ notification.timestamp }} - <a href="{% url 'user-tasks' notification.actor.username %} ">{{ notification.actor.profile.last_name }} {{ notification.actor.profile.first_name }}</a> {{ notification.verb }}
-                    <a href="{% url 'task-detail' notification.action_object_object_id %} "> Посмотреть тут.</a>
+                    {% if notification.action_object_content_type.id == 21 %}
+                        <a href="{% url 'chat' notification.actor.username %} "> Посмотреть тут.</a>
+                    {% elif notification.action_object_content_type.id == 12 %}
+                        <a href="{% url 'post-detail' notification.action_object_object_id %} "> Посмотреть тут.</a>
+                    {% else %}
+                        <a href="{% url 'task-detail' notification.action_object_object_id %} "> Посмотреть тут.</a>
+                    {% endif %}
                 </p>
             {% endfor %}
             <a class="btn btn-success" href="{% url 'read_all_notifications'%}">Прочитать всё</a>
@@ -20,6 +26,8 @@
                 {{ notification.timestamp }} - <a href="{% url 'user-tasks' notification.actor.username %} ">{{ notification.actor.profile.last_name }} {{ notification.actor.profile.first_name }}</a> {{ notification.verb }}
                 {% if notification.action_object_content_type.id == 21 %}
                     <a href="{% url 'chat' notification.actor.username %} "> Посмотреть тут.</a>
+                {% elif notification.action_object_content_type.id == 12 %}
+                    <a href="{% url 'post-detail' notification.action_object_object_id %} "> Посмотреть тут.</a>
                 {% else %}
                     <a href="{% url 'task-detail' notification.action_object_object_id %} "> Посмотреть тут.</a>
                 {% endif %}
