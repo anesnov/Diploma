@@ -1,5 +1,6 @@
 from django.contrib.admin import action
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.template.context_processors import request
@@ -75,16 +76,36 @@ class UserTaskListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super(UserTaskListView, self).get_context_data(**kwargs)
+        context['username'] = self.kwargs.get('username')
         filter = self.request.GET.get('filter' or None)
+        is_done = self.request.GET.get('is_done' or None)
+        filter_params = {}
+
+
+        # if filter is not None or is_done is not None:
+            # context['filter_url'] = ''
+        if filter is not None:
+            filter_params['filter'] = filter
+        if is_done is not None:
+            filter_params['is_done'] = is_done
         # print(filter)
-        if filter == "incoming":
-            context['filter'] = 1
-            context['filter_url'] = "filter=incoming"
-        elif filter == "outgoing":
-            context['filter'] = 2
-            context['filter_url'] = "filter=outgoing"
-        else:
-            context['filter'] = 0
+        # if filter == "incoming":
+        #     filter_params['filter'] = 1
+        #     # context['filter'] = 1
+        #     # context['filter_url'] += "filter=incoming"
+        # elif filter == "outgoing":
+        #     filter_params['filter'] = 2
+        #     # context['filter'] = 2
+        #     # context['filter_url'] += "filter=outgoing"
+        # else:
+        #     # context['filter'] = 0
+        #     filter_params['filter'] = 0
+
+        if is_done is not None:
+            filter_params['is_done'] = is_done
+            # context['is_done'] = is_done
+        if filter is not None or is_done is not None:
+            context['filter_params'] = filter_params
 
         return context
 
@@ -92,27 +113,37 @@ class UserTaskListView(ListView):
         user = get_object_or_404(User, username=self.kwargs.get('username'))
         giver = self.request.user
         filter = self.request.GET.get('filter')
-        print(filter)
+        is_done = self.request.GET.get('is_done')
         filters = {}
+
+        if is_done is not None:
+            done = is_done == "True"
+            filters['done'] = done
+
         if filter == "incoming":
             if (user == giver):
-                print("in self")
                 filters['to_user'] = giver
             else:
-                print("in")
                 filters['from_user'] = giver
                 filters['to_user'] = user
 
         elif filter == "outgoing":
             if (user == giver):
-                print("out self")
                 filters['from_user'] = giver
             else:
-                print("out")
                 filters['from_user'] = user
                 filters['to_user'] = giver
+
+        elif filter == "all":
+            if (user == giver):
+                q1 = Q(from_user=user)
+                q2 = Q(to_user=user)
+            else:
+                q1 = Q(from_user=user, to_user=giver)
+                q2 = Q(from_user=giver, to_user=user)
+            return Task.objects.filter(q1 | q2).filter(**filters).order_by('-date_created')
+
         else:
-            print("without filters")
             filters['to_user'] = user
 
         # if self.request.GET.get("filter") == "incoming":
@@ -130,6 +161,33 @@ class UserTaskListView(ListView):
         # if (user == giver):
         #     return Task.objects.filter(to_user=user).order_by('-date_created')
         return Task.objects.filter(**filters).order_by('-date_created')
+
+def add_filters(request, *args, **kwargs):
+    if request.method == 'POST':
+        print("Hello!")
+    # user = get_object_or_404(User, username=kwargs['username'])
+    user = kwargs.get('username')
+    print(user)
+    filter = request.POST.get('filter_select')
+    # filter = request.GET['filter_select']
+    # is_done = request.GET['is_done_select']
+    is_done = request.POST.get('is_done_select')
+    print("Adding filters")
+    print(filter)
+    print(is_done)
+
+    query = ""
+
+    if filter is not None or is_done is not None:
+        query += "?"
+
+    if filter is not None:
+        query += "filter=" + filter + "&"
+
+    if is_done is not None and is_done != "all":
+        query += "is_done=" + is_done + "&"
+
+    return redirect(f'/user/{user}/tasks/'+query)
 
 
 class TaskDetailView(DetailView):

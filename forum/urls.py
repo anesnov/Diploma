@@ -42,6 +42,7 @@ urlpatterns = [
     path('user/<str:username>/dm/create-message/', chat.views.create_message, name='create-message'),
     path('user/<str:username>/dm/stream-chat-messages/', chat.views.stream_chat_messages, name='stream-chat-messages'),
 
+    path('user/<str:username>/tasks/add-filters/', add_filters, name='user-tasks-filters'),
     path('user/<str:username>/tasks/', UserTaskListView.as_view(), name='user-tasks'),
     path('user/<str:username>/tasks/new/', TaskCreateView.as_view(), name='task-create'),
     path('tasks/<int:pk>/', TaskDetailView.as_view(), name='task-detail'),

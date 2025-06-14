@@ -79,10 +79,10 @@ def profile_update(request, *args, **kwargs):
 
 
 def profile_view(request, *args, **kwargs):
-    user = get_object_or_404(User, username=kwargs.get('username'))
-    profile = user.profile
+    profile_user = get_object_or_404(User, username=kwargs.get('username'))
+    profile = profile_user.profile
 
-    return render(request, 'profile_detail.html', {'profile': profile, 'user':user})
+    return render(request, 'profile_detail.html', {'profile': profile, 'profile_user':profile_user})
 
 
 def promote(request, *args, **kwargs):

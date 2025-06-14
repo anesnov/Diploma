@@ -73,10 +73,10 @@
         </div>
 
         <div class="button-row">
-            <a class="btn btn-success" href="{% url 'task-create' request.user.username %}" style="margin-right: 5px; margin-top: 5px">Назначить задачу</a>
-            <a class="btn btn-warning" href="{% url 'user-tasks' request.user.username %}" style="margin-right: 5px; margin-top: 5px">Просмотреть задачи</a>
-            <a class="btn btn-info" href="{% url 'chat' request.user.username %}" style="margin-right: 5px; margin-top: 5px">Личные сообщения</a>
-            {% if user.username == request.user.username %}
+            <a class="btn btn-success" href="{% url 'task-create' profile_user.username %}" style="margin-right: 5px; margin-top: 5px">Назначить задачу</a>
+            <a class="btn btn-warning" href="{% url 'user-tasks' profile_user.username %}" style="margin-right: 5px; margin-top: 5px">Просмотреть задачи</a>
+            <a class="btn btn-info" href="{% url 'chat' profile_user.username %}" style="margin-right: 5px; margin-top: 5px">Личные сообщения</a>
+            {% if user.username == profile_user.username %}
                 <a class="btn btn-primary" href="{% url 'profile-update' user.username %}" style="margin-right: 5px; margin-top: 5px">Редактировать профиль</a>
             {% endif %}
         </div>

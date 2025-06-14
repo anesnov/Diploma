@@ -14,6 +14,28 @@
             <h1 class="mb-3">Задачи от сотрудника {{ tasks.0.from_user.profile.last_name }} {{ tasks.0.from_user.profile.first_name }} ({{ page_obj.paginator.count }})</h1>
         {% endif %}
     {% endif %}
+    <div class="flex-row mb-2 p-2 align-items-center">
+        <span>Фильтры: </span>
+        <form action="{% url 'user-tasks-filters' username %}" method="POST" class="flex-row">
+            {% csrf_token %}
+            <select name="filter_select" class="form-select" style="width: auto; margin-left: 10px">
+                <option selected="selected" disabled>Полученные/отправленные:</option>
+                <option value="all">Все</option>
+                <option value="incoming">Только полученные</option>
+                <option value="outgoing">Только отправленные</option>
+            </select>
+
+            <select name="is_done_select" class="form-select" style="width: auto; margin-left: 10px">
+                <option selected="selected" disabled>Статус выполнения:</option>
+                <option value="all">Все</option>
+                <option value="True">Только выполненные</option>
+                <option value="False">Только невыполненные</option>
+            </select>
+            <input type="submit" value="Применить фильтры" class="btn btn-success" style="width: auto; margin-left: 10px">
+{#            <a class="btn btn-success" style="width: auto; margin-left: 10px" href="{% url 'user-tasks-filters' user.username %}">Применить фильтры</a>#}
+        </form>
+{#        {% url 'profile' task.from_user.username %}#}
+    </div>
 {#    <h1 class="mb-3">Задачи пользователю {{ view.kwargs.username }} ({{ page_obj.paginator.count }})</h1>#}
     {% for task in tasks %}
         <article class="media content-section">
@@ -25,9 +47,9 @@
               </div>
               <div style="width: 100%;">
                 <b><small class="text-muted"> Выдал: {{ task.username}}</small></b>
-                <a class="article-title mr-2" href="{% url 'user-posts' task.from_user.username %}">{{ task.from_user.profile.last_name }} {{ task.from_user.profile.first_name }}</a>
+                <a class="article-title mr-2" href="{% url 'profile' task.from_user.username %}">{{ task.from_user.profile.last_name }} {{ task.from_user.profile.first_name }}</a>
                 <b><small class="text-muted"> Кому: {{ task.username}}</small></b>
-                <a class="article-title mr-2" href="{% url 'user-posts' task.to_user.username %}">{{ task.to_user.profile.last_name }} {{ task.to_user.profile.first_name }}</a>
+                <a class="article-title mr-2" href="{% url 'profile' task.to_user.username %}">{{ task.to_user.profile.last_name }} {{ task.to_user.profile.first_name }}</a>
                 <br>
 
                 <b><small class="text-muted"> Выдано: </small></b>
@@ -69,21 +91,21 @@
     {% if is_paginated %}
 
       {% if page_obj.has_previous %}
-        <a class="btn btn-outline-info mb-4 mr-1" href="?page=1&{{ filter_url }}">Первая</a>
-        <a class="btn btn-outline-info mb-4 mr-1" href="?page={{ page_obj.previous_page_number }}&{{ filter_url }}">Предыдущая</a>
+        <a class="btn btn-outline-info mb-4 mr-1" href="?page=1&{% for param, value in filter_params.items %}{{ param }}={{ value }}&{% endfor %}">Первая</a>
+        <a class="btn btn-outline-info mb-4 mr-1" href="?page={{ page_obj.previous_page_number }}&{% for param, value in filter_params.items %}{{ param }}={{ value }}&{% endfor %}">Предыдущая</a>
       {% endif %}
 
       {% for num in page_obj.paginator.page_range %}
         {% if page_obj.number == num %}
-          <a class="btn btn-info mb-4 mr-1" href="?page={{ num }}&{{ filter_url }}">{{ num }}</a>
+          <a class="btn btn-info mb-4 mr-1" href="?page={{ num }}&{% for param, value in filter_params.items %}{{ param }}={{ value }}&{% endfor %}">{{ num }}</a>
         {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-          <a class="btn btn-outline-info mb-4 mr-1" href="?page={{ num }}&{{ filter_url }}">{{ num }}</a>
+          <a class="btn btn-outline-info mb-4 mr-1" href="?page={{ num }}&{% for param, value in filter_params.items %}{{ param }}={{ value }}&{% endfor %}">{{ num }}</a>
         {% endif %}
       {% endfor %}
 
       {% if page_obj.has_next %}
-        <a class="btn btn-outline-info mb-4 mr-1" href="?page={{ page_obj.next_page_number }}&{{ filter_url }}">Следующая</a>
-        <a class="btn btn-outline-info mb-4 mr-1" href="?page={{ page_obj.paginator.num_pages }}&{{ filter_url }}">Последняя</a>
+        <a class="btn btn-outline-info mb-4 mr-1" href="?page={{ page_obj.next_page_number }}&{% for param, value in filter_params.items %}{{ param }}={{ value }}&{% endfor %}">Следующая</a>
+        <a class="btn btn-outline-info mb-4 mr-1" href="?page={{ page_obj.paginator.num_pages }}&{% for param, value in filter_params.items %}{{ param }}={{ value }}&{% endfor %}">Последняя</a>
       {% endif %}
 
     {% endif %}
