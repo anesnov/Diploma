@@ -1,35 +1,104 @@
 {% extends 'homepage/page_template.html' %}
+
 {% block content %}
-    {% for department in departments  %}
-        {% if department.is_director %}
-            <h2>{{ department.name }}</h2>
-            {% for director in users  %}
-                {% if director.department == department %}
-                <article class="media content-section">
-                  <div class="media-body">
-                    <h4><a class="article-title" href="{% url 'user-posts' director.user.username %}">{{ director.last_name }} {{ director.first_name }} {{ director.middle_name }}</a></h4>
-                  </div>
-                </article>
-                {% endif %}
-            {% endfor %}
-        {% endif %}
-    {% endfor %}
+<style>
+    .departments-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+
+    .department-card {
+        background-color: #f9f9f9;
+        padding: 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        flex: 1 1 400px;
+        min-width: 350px;
+    }
+
+    .department-card h2 {
+        margin-top: 0;
+        margin-bottom: 1rem;
+        color: #333;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 0.5rem;
+    }
+
+    .user-entry {
+        margin-bottom: 1rem;
+    }
+
+    .user-entry h4 {
+        margin: 0;
+    }
+
+    .user-entry .head-label {
+        font-size: 0.85rem;
+        color: #007bff;
+        font-weight: bold;
+    }
+    .position-title {
+    font-size: 0.9rem;
+    color: #555;
+}
+</style>
+
+<h1>Структура компании</h1>
+
+<div class="departments-grid">
     {% for department in departments %}
-        {% if not department.is_director %}
+        <div class="department-card">
             <h2>{{ department.name }}</h2>
-            {% for user in users %}
-                {% if user.department == department %}
-                    <article class="media content-section">
-                      <div class="media-body">
-                          {% if user.position.is_head %}
-                              <h4>Руководитель отдела</h4>
-                          {% endif %}
-                        <h4><a class="article-title" href="{% url 'user-posts' user.user.username %}">{{ user.last_name }} {{ user.first_name }} {{ user.middle_name }}</a></h4>
-                      </div>
-                    </article>
-                {% endif %}
-            {% endfor %}
-        {% endif %}
+
+            {% if department.is_director %}
+                {% for director in users %}
+                    {% if director.department == department %}
+                        <div class="user-entry">
+                            <h4>
+                                <a class="article-title" href="{% url 'profile' director.user.username %}">
+                                {{ director.last_name }} {{ director.first_name }} {{ director.middle_name }}
+                                </a>
+                            </h4>
+                            {% if director.position %}
+                                <div class="position-title">{{ director.position.name }}</div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                {% for user in users %}
+                    {% if user.department == department %}
+                        <div class="user-entry">
+                            {% if user.position.is_head %}
+                                <div class="head-label">Руководитель отдела</div>
+                            {% endif %}
+                            <h4>
+                                <a class="article-title" href="{% url 'profile' user.user.username %}">
+                                {{ user.last_name }} {{ user.first_name }} {{ user.middle_name }}
+                                </a>
+                            </h4>
+                            {% if user.position %}
+                                <div class="position-title">{{ user.position.name }}</div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        </div>
     {% endfor %}
-    
-{% endblock content %}
+</div>
+
+{% if other_users %}
+    <hr>
+    <h2>Остальные сотрудники</h2>
+    {% for other in other_users %}
+        <h4>
+            <a class="article-title" href="{% url 'profile' other.user.username %}">
+            {{ other.last_name }} {{ other.first_name }} {{ other.middle_name }}
+            </a>
+        </h4>
+    {% endfor %}
+{% endif %}
+{% endblock %}

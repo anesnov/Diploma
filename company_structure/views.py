@@ -23,6 +23,9 @@ from django.views.generic import (
 def structure(request):
     users = Profile.objects.all().order_by('-position__is_head')
     departments = Department.objects.all().order_by('-is_director')
-    print(departments[0])
-    return render(request, 'hierarchy.html', {'users': users, 'departments': departments})
+    other_users = Profile.objects.filter(department__isnull=True)
+    for user in other_users:
+        print(user)
+    # print(departments[0])
+    return render(request, 'hierarchy.html', {'users': users, 'departments': departments, 'other_users': other_users})
 
