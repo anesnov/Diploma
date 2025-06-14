@@ -54,10 +54,10 @@ class ReplyForm(ModelForm):
                 'class': 'form-control',
                 'placeholder': "Ответ"
             }),
-            "attachments": FileInput(attrs={
-                'class': 'form-control',
-                'placeholder': "Вложения"
-            })
+            # "attachments": FileInput(attrs={
+            #     'class': 'form-control',
+            #     'placeholder': "Вложения"
+            # })
         }
 
 

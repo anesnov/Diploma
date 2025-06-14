@@ -29,7 +29,7 @@
     {% endif %}
     <div class="features data">
 
-        <form method="post">
+        <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <br>
             {{ form.reply }}<br>

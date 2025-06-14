@@ -189,7 +189,6 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         return False
 
 
-
 """
 Ответы
 """
@@ -224,9 +223,15 @@ class RepliesCreateView(LoginRequiredMixin, CreateView):
     context_object_name = 'replies'
     form_class = ReplyForm
 
+    def get_success_url(self):
+        # print(self.pk)
+        return reverse('post-detail', kwargs={'pk': self.kwargs.get('pk')})
+
     def get_context_data(self, **kwargs):
         context = super(RepliesCreateView, self).get_context_data(**kwargs)
-        context['reply'] = get_object_or_404(Replies, id=self.request.GET.get('reply_to' or None))
+        reply = self.request.GET.get('reply_to' or None)
+        if reply is not None:
+            context['reply'] = get_object_or_404(Replies, id=reply)
         return context
 
     def form_valid(self, form):
@@ -237,9 +242,10 @@ class RepliesCreateView(LoginRequiredMixin, CreateView):
         if reply_to is not None:
             reply = get_object_or_404(Replies, id=reply_to)
             form.instance.reply_to = reply
-            notify.send(self.request.user, recipient=reply.author, verb="ответил(а) на Ваше сообщение в обсуждении.", action_object=reply.post)
-        if form.instance.reply_to.post.id != form.instance.post_id:
-            return redirect('post-detail', pk=form.instance.post_id)
+            if self.request.user != reply.author:
+                notify.send(self.request.user, recipient=reply.author, verb="ответил(а) на Ваше сообщение в обсуждении.", action_object=reply.post)
+        # if form.instance.reply_to.post.id != form.instance.post_id:
+        #     return redirect('post-detail', pk=form.instance.post_id)
         #form.instance.attachments = self.request.POST.get('attachments')
         return super().form_valid(form)
 

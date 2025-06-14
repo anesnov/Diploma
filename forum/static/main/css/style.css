@@ -63,11 +63,42 @@ ul {
     border-bottom: 1px solid #e3e3e3;
     display:inline-block;
 }
+/*.notification-button {*/
+/*    background: url('https://icons.veryicon.com/png/o/miscellaneous/fine-fillet-icon/notification-bell.png');*/
+/*    background-repeat: no-repeat;*/
+/*    background-position: -2px -2px;*/
+/*    background-size: 43px 43px;*/
+/*}*/
+
 .notification-button {
-    background: url('https://icons.veryicon.com/png/o/miscellaneous/fine-fillet-icon/notification-bell.png');
+    position: relative;
+    background: none;
+    border: none;
+    width: 40px;
+    height: 40px;
+    background-image: url('https://icons.veryicon.com/png/o/miscellaneous/fine-fillet-icon/notification-bell.png'); /* replace with your bell image path */
+    background-size: contain;
     background-repeat: no-repeat;
-    background-position: -2px -2px;
-    background-size: 43px 43px;
+    background-position: center;
+    padding: 0;
+    cursor: pointer;
+}
+
+.notification-button .badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    transform: translate(40%, -40%);
+    background-color: red;
+    color: white;
+    font-size: 0.65rem;
+    padding: 3px 6px;
+    border-radius: 50%;
+    min-width: 18px;
+    text-align: center;
+    line-height: 1;
+    font-weight: bold;
+    z-index: 2;
 }
 
 .bg-blue {

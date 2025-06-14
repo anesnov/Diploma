@@ -44,7 +44,7 @@
             {% if reply.attachments %}
                 <div class="attachments" style="border-top: 1px solid lightgray; display: flex; flex-direction: column;">
                     <span>Вложения:</span><br>
-                    <img class="" src="{{ reply.attachments.url }}" onerror="this.onerror=null; this.src='https://pngimg.com/uploads/folder/folder_PNG8773.png'" width="120px" height="120px">
+                    <img class="" src="{{ reply.attachments.url }}" style="object-fit: contain;" onerror="this.onerror=null; this.src='https://pngimg.com/uploads/folder/folder_PNG8773.png'" width="120px" height="120px">
                     <br>
                     <a href="{{ reply.attachments.url }}"  class="article-title"> {{ reply.attachments.name }}</a>
                 </div>

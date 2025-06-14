@@ -51,7 +51,7 @@ class Replies(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     reply = models.TextField()
     date_posted = models.DateTimeField(default=timezone.now)
-    attachments = models.FileField(upload_to='attachments', blank=True)
+    attachments = models.FileField(upload_to='attachments', blank=True, null=True)
     reply_to = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -60,8 +60,8 @@ class Replies(models.Model):
     def is_reply(self):
         return self.reply_to is not None
 
-    def get_absolute_url(self):
-        return reverse('post-detail', kwargs={'pk': self.post.id})
+    # def get_absolute_url(self):
+    #     return reverse('post-detail', kwargs={'pk': self.post.id})
 
     class Meta:
         verbose_name = "Ответ"
