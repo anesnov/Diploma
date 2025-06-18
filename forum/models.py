@@ -49,7 +49,7 @@ class Post(models.Model):
 class Replies(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
-    reply = models.TextField()
+    reply = models.CharField(max_length=2048)
     date_posted = models.DateTimeField(default=timezone.now)
     attachments = models.FileField(upload_to='attachments', blank=True, null=True)
     reply_to = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE)

@@ -5,6 +5,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.template.context_processors import request
 from notifications.signals import notify
+from django.core.paginator import Paginator
 
 from login_modal.forms import SearchForm
 from django.shortcuts import render, get_object_or_404
@@ -197,8 +198,13 @@ class RepliesListView(ListView):
     model = Replies
     template_name = 'forum/replies.html'
     context_object_name = 'replies'
-    ordering = ['-date_posted']
-    paginate_by = 50
+    #ordering = ['-date_posted']
+    paginate_by = 5
+
+    def get_context_data(self, **kwargs):
+        context = super(RepliesListView, self).get_context_data(**kwargs)
+        context['post'] = get_object_or_404(Post, id=self.kwargs.get('pk'))
+        return context
 
     def get_queryset(self):
         post = get_object_or_404(Post, id=self.kwargs.get('pk'))
@@ -232,6 +238,7 @@ class RepliesCreateView(LoginRequiredMixin, CreateView):
         reply = self.request.GET.get('reply_to' or None)
         if reply is not None:
             context['reply'] = get_object_or_404(Replies, id=reply)
+            context['is_reply'] = True
         return context
 
     def form_valid(self, form):
@@ -249,4 +256,16 @@ class RepliesCreateView(LoginRequiredMixin, CreateView):
         #form.instance.attachments = self.request.POST.get('attachments')
         return super().form_valid(form)
 
+def search_view(request):
+    object_type = request.GET.get('category')
+    query = request.GET.get('query')
 
+    if object_type == 'tasks':
+        return redirect(f'/user/{request.user.username}/tasks/?query={query}') #'user-tasks', username=request.user.username, query=query
+
+    replies = Replies.objects.filter(reply__icontains=query).order_by('-date_posted')
+    paginator = Paginator(replies, 5)  # Show 25 contacts per page.
+
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'forum/replies_search.html', {'replies': replies, "page_obj": page_obj, "query": query})

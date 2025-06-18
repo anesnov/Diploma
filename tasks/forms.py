@@ -18,7 +18,8 @@ class TaskForm(ModelForm):
             }),
             "date_completion": DateTimeInput(attrs={
                 'type': 'datetime-local',
-                'placeholder': "Дата конца"
+                'placeholder': "Дата конца",
+                'required': False
             }),
             "is_urgent": CheckboxInput(attrs={
                 'class': 'required checkbox form-control'

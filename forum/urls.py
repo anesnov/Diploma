@@ -17,19 +17,22 @@ from .views import (
     PostDeleteView,
     UserPostListView,
     RepliesListView,
-    sections, RepliesCreateView, replies, SectionCreateView, SectionThemeCreateView
+    sections, RepliesCreateView, replies, SectionCreateView, SectionThemeCreateView, search_view
 )
 
 urlpatterns = [
     #path('',  PostListView.as_view(), name='home'), #views.index
     path('',  sections, name='home'),
-    path('about', views.about, name='about'),
+    path('search/', search_view, name='search'),
+    path('about/', views.about, name='about'),
     path('company/', structure, name='company'),
     path("user/", login_modal_views.profile_update, name="profile"),
     path("_login/", login_modal_views.login, name="login"),
     path("register/", login_modal_views.register, name="register"),
     # path("logout/", login_modal_views.logout, name="logout"),
     path('logout/', auth_views.LogoutView.as_view(template_name='homepage/frontpage.html'), name='logout'),
+
+
 
     path('user/<str:username>/', profile_view, name='profile'),
     path('user/<str:username>/update/', profile_update, name='profile-update'),
@@ -55,7 +58,7 @@ urlpatterns = [
     path('theme/<int:pk>/new_section/', SectionCreateView.as_view(), name='section-create'),
     path('section/<int:pk>/', PostListView.as_view(), name='section'),
     path('section/<int:pk>//new/', PostCreateView.as_view(), name='post-create'),
-    path('post/<int:pk>/', replies, name='post-detail'),
+    path('post/<int:pk>/', RepliesListView.as_view(), name='post-detail'), #replies
     path('post/<int:pk>/reply/', RepliesCreateView.as_view(), name='reply-create'),
     path('post/<int:pk>/update/', PostUpdateView.as_view(), name='post-update'),
     path('post/<int:pk>/delete/', PostDeleteView.as_view(), name='post-delete'),

@@ -12,7 +12,7 @@ class Task(models.Model):
     from_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='%(class)s_requests_created') # От кого
     to_user = models.ForeignKey(User, on_delete=models.CASCADE) # Кому
     title = models.CharField(max_length=100)
-    description = models.TextField()
+    description = models.CharField(max_length=2048)
     done = models.BooleanField(default=False) # Статус
     is_urgent = models.BooleanField(default=False) # Важность
     date_created = models.DateTimeField(default=timezone.now) # Дата создания

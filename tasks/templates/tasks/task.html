@@ -1,0 +1,51 @@
+<article class="media content-section">
+
+          <div class="media-body">
+            <div class="article-metadata" style="display: flex;">
+              <div>
+                <img class="rounded-circle article-img" src="{{ task.from_user.profile.image.url }}">
+              </div>
+              <div style="width: 100%;">
+                <b><small class="text-muted"> Выдал: {{ task.username}}</small></b>
+                <a class="article-title mr-2" href="{% url 'profile' task.from_user.username %}">{{ task.from_user.profile.last_name }} {{ task.from_user.profile.first_name }}</a>
+                <b><small class="text-muted"> Кому: {{ task.username}}</small></b>
+                <a class="article-title mr-2" href="{% url 'profile' task.to_user.username %}">{{ task.to_user.profile.last_name }} {{ task.to_user.profile.first_name }}</a>
+                <br>
+
+                <b><small class="text-muted"> Выдано: </small></b>
+                <small class="text-muted">{{ task.date_created|date:"F d, Y h:m" }}</small>
+
+                {% if task.date_completion %}
+                    <b><small class="text-muted"> До: </small></b>
+                    <small class="text-muted"> {{ task.date_completion|date:"F d, Y h:m" }}</small>
+                {% endif %}
+                <br>
+
+
+                {% if task.is_urgent and not task.done %}
+                    <span style="color: red;">Срочно!</span>
+                {% elif task.done %}
+                    <span style="color: green;">Выполнено</span>
+                {% else %}
+                    <span style="color: #428bca;">Не выполнено</span>
+                {% endif %}
+              </div>
+
+              <div style="width: 100%;">
+                {% if task.from_user == user or task.to_user == user %}
+                  <a class="btn btn-danger" href="{% url 'task-delete' task.id %}" style="float: right; margin-right: 5px; margin-top: 5px">Удалить</a>
+                  {% if task.from_user == user %}
+                      <a class="btn btn-secondary" href="{% url 'task-update' task.id %}" style="float: right; margin-right: 5px; margin-top: 5px">Редактировать</a>
+                  {% endif %}
+                  {% if not task.done %}
+                      <a class="btn btn-warning" href="{% url 'task-complete' task.id %}?next={{ request.get_full_path |urlencode }}" style="float: right; margin-right: 5px; margin-top: 5px">Выполнить</a>
+                  {% else %}
+                      <a class="btn btn-warning" href="{% url 'task-uncomplete' task.id %}?next={{ request.get_full_path |urlencode }}" style="float: right; margin-right: 5px; margin-top: 5px">Отменить выполнение</a>
+                  {% endif %}
+                {% endif %}
+              </div>
+            </div>
+            <h2><a class="article-title" href="{% url 'task-detail' task.id %}">{{ task.title }}</a></h2>
+            <p class="article-content">{{ task.description }}</p>
+          </div>
+        </article>

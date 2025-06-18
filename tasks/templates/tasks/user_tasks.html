@@ -16,8 +16,9 @@
     {% endif %}
     <div class="flex-row mb-2 p-2 align-items-center">
         <span>Фильтры: </span>
-        <form action="{% url 'user-tasks-filters' username %}" method="POST" class="flex-row">
-            {% csrf_token %}
+        <form action="{% url 'user-tasks' username %}" class="flex-row">
+{#            <form action="{% url 'user-tasks-filters' username %}" method="POST" class="flex-row">#}
+{#            {% csrf_token %}#}
             <select name="filter_select" class="form-select" style="width: auto; margin-left: 10px">
                 <option selected="selected" disabled>Полученные/отправленные:</option>
                 <option value="all">Все</option>
@@ -31,60 +32,16 @@
                 <option value="True">Только выполненные</option>
                 <option value="False">Только невыполненные</option>
             </select>
+            <input type="text" class="form-control"  style="width: auto; margin-left: 10px" aria-label="Task search" name="query">
             <input type="submit" value="Применить фильтры" class="btn btn-success" style="width: auto; margin-left: 10px">
 {#            <a class="btn btn-success" style="width: auto; margin-left: 10px" href="{% url 'user-tasks-filters' user.username %}">Применить фильтры</a>#}
         </form>
+        <a class="btn btn-warning ml-3 mt-2" style="width: auto; margin-left: 10px" href={% url 'user-tasks' username %}>Очистить фильтры</a>
 {#        {% url 'profile' task.from_user.username %}#}
     </div>
 {#    <h1 class="mb-3">Задачи пользователю {{ view.kwargs.username }} ({{ page_obj.paginator.count }})</h1>#}
     {% for task in tasks %}
-        <article class="media content-section">
-
-          <div class="media-body">
-            <div class="article-metadata" style="display: flex;">
-              <div>
-                <img class="rounded-circle article-img" src="{{ task.from_user.profile.image.url }}">
-              </div>
-              <div style="width: 100%;">
-                <b><small class="text-muted"> Выдал: {{ task.username}}</small></b>
-                <a class="article-title mr-2" href="{% url 'profile' task.from_user.username %}">{{ task.from_user.profile.last_name }} {{ task.from_user.profile.first_name }}</a>
-                <b><small class="text-muted"> Кому: {{ task.username}}</small></b>
-                <a class="article-title mr-2" href="{% url 'profile' task.to_user.username %}">{{ task.to_user.profile.last_name }} {{ task.to_user.profile.first_name }}</a>
-                <br>
-
-                <b><small class="text-muted"> Выдано: </small></b>
-                <small class="text-muted">{{ task.date_created|date:"F d, Y h:m" }}</small>
-                <b><small class="text-muted"> До: </small></b>
-                <small class="text-muted"> {{ task.date_completion|date:"F d, Y h:m" }}</small>
-                <br>
-
-                {% if task.is_urgent and not task.done %}
-                    <span style="color: red;">Срочно!</span>
-                {% elif task.done %}
-                    <span style="color: green;">Выполнено</span>
-                {% else %}
-                    <span style="color: #428bca;">Не выполнено</span>
-                {% endif %}
-              </div>
-
-              <div style="width: 100%;">
-                {% if task.from_user == user or task.to_user == user %}
-                  <a class="btn btn-danger" href="{% url 'task-delete' task.id %}" style="float: right; margin-right: 5px; margin-top: 5px">Удалить</a>
-                  {% if task.from_user == user %}
-                      <a class="btn btn-secondary" href="{% url 'task-update' task.id %}" style="float: right; margin-right: 5px; margin-top: 5px">Редактировать</a>
-                  {% endif %}
-                  {% if not task.done %}
-                      <a class="btn btn-warning" href="{% url 'task-complete' task.id %}?next={{ request.get_full_path |urlencode }}" style="float: right; margin-right: 5px; margin-top: 5px">Выполнить</a>
-                  {% else %}
-                      <a class="btn btn-warning" href="{% url 'task-uncomplete' task.id %}?next={{ request.get_full_path |urlencode }}" style="float: right; margin-right: 5px; margin-top: 5px">Отменить выполнение</a>
-                  {% endif %}
-                {% endif %}
-              </div>
-            </div>
-            <h2><a class="article-title" href="{% url 'task-detail' task.id %}">{{ task.title }}</a></h2>
-            <p class="article-content">{{ task.description }}</p>
-          </div>
-        </article>
+        {% include 'tasks/task.html' with task=task %}
     {% endfor %}
 
     <div class="pagination justify-content-center"> 
