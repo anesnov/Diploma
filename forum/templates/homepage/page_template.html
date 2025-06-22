@@ -120,6 +120,7 @@
     <script src="{% static 'notifications/notify.js' %}" type="text/javascript"></script>
     {% register_notify_callbacks callbacks='fill_notification_badge, fill_notification_list' menu_class='dropdown-menu notification'%}
     <script src="{% static 'js/dialog.js' %}"></script>
+    <script src="{% url 'javascript-catalog' %}"></script>
     {{ request.combined_media }}
   </body>
 </html>

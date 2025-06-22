@@ -11,10 +11,21 @@
                 {% if theme.id == section.theme.id %}
                       <div class="media-body" style="border-top: 1px solid #cccccc; padding-left: 12px;">
                         <a class="article-title" href="{% url 'section' section.id %}" style="font-size: 22px;">{{ section.name }}</a>
+
+                        <div style="border-top: 2px dotted lightgray;">
+
+                          {% if section.count > 0 %}
+                              <h6><span>Обсуждений: {{ section.count }}</span> <span>Последнее: {{ section.last_reply }}</span> </h6>
+                          {% else %}
+                              <h6>В этом разделе ещё ент обсуждений.</h6>
+                          {% endif %}
+                        </div>
+
                         {# if user.is_staff #}
                             <!--a class="btn btn-sm mb-10" href="{% url 'post-delete' section.id %}" style="float: right">Удалить</a-->
                         {# endif #}
                       </div>
+
                 {% endif %}
             {% endfor %}
         </div>

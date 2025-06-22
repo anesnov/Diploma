@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'notifications',
     'daphne',
+    'formset',
 
     'django_htmx',
     'crispy_bootstrap5',

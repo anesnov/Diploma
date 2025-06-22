@@ -1,6 +1,11 @@
 {% extends 'homepage/page_template.html' %}
 {% block content %}
-
+    <article class="media content-section mb-2">
+          <div class="media-body">
+              <h2><a class="article-title" href="{% url 'home' %}">{{ posts.0.section.name }}</a></h2>
+              <a class="btn btn-primary mb-2 mt-2" href="{% url 'post-create' posts.0.section.id %}">Новое обсуждение</a>
+          </div>
+    </article>
     {% for post in posts %}
         <article class="media content-section">
           <div class="media-body">

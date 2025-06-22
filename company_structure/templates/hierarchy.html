@@ -58,7 +58,7 @@
                         <div class="user-entry">
                             <h4>
                                 <a class="article-title" href="{% url 'profile' director.user.username %}">
-                                {{ director.last_name }} {{ director.first_name }} {{ director.middle_name }}
+                                {{ director.full_name }}
                                 </a>
                             </h4>
                             {% if director.position %}
@@ -76,7 +76,7 @@
                             {% endif %}
                             <h4>
                                 <a class="article-title" href="{% url 'profile' user.user.username %}">
-                                {{ user.last_name }} {{ user.first_name }} {{ user.middle_name }}
+                                {{ user.full_name }}
                                 </a>
                             </h4>
                             {% if user.position %}

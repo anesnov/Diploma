@@ -19,6 +19,8 @@ from django.template.defaulttags import url
 from django.urls import path, include
 from django.conf.urls.static import static
 from django.conf import settings
+from django.views.decorators.cache import cache_page
+from django.views.i18n import JavaScriptCatalog
 from rest_framework.authtoken.views import obtain_auth_token
 from forum.views import notification_view, read_all_notifications
 
@@ -30,6 +32,11 @@ urlpatterns = [
     path('inbox/notifications/', include('notifications.urls', namespace='notifications')),
     path('notifications/', notification_view, name='notification_list'),
     path('notifications/read_all', read_all_notifications, name='read_all_notifications'),
+    path(
+            'jsi18n/',
+            cache_page(3600)(JavaScriptCatalog.as_view(packages=['formset'])),
+            name='javascript-catalog'
+        ),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

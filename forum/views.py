@@ -28,6 +28,23 @@ import chat.models
 
 
 """
+Поиск
+"""
+def search_view(request):
+    object_type = request.GET.get('category')
+    query = request.GET.get('query')
+
+    if object_type == 'tasks':
+        return redirect(f'/user/{request.user.username}/tasks/?query={query}') #'user-tasks', username=request.user.username, query=query
+
+    replies = Replies.objects.filter(reply__icontains=query).order_by('-date_posted')
+    paginator = Paginator(replies, 5)  # Show 25 contacts per page.
+
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'forum/replies_search.html', {'replies': replies, "page_obj": page_obj, "query": query})
+
+"""
 Оповещения
 """
 def notification_view(request):
@@ -80,6 +97,14 @@ def sections(request):
     themes = SectionTheme.objects.all().order_by('priority')
     sections = Section.objects.all()
 
+    for section in sections:
+        section.count = Post.objects.filter(section=section).count()
+        if section.count > 0:
+            date = Post.objects.filter(section=section).order_by('-date_created').first().date_created
+            section.last_reply = date
+        else:
+            section.last_reply = 'Никогда'
+
     return render(request, 'forum/sections.html', {'themes': themes, 'sections': sections})
 
 class SectionCreateView(LoginRequiredMixin, CreateView):
@@ -111,6 +136,7 @@ class PostListView(ListView):
     context_object_name = 'posts'
     ordering = ['-date_created']
     paginate_by = 5
+
     def get_queryset(self):
         posts = Post.objects.filter(section=self.kwargs.get('pk')).order_by('-date_created')
         for post in posts:
@@ -118,7 +144,6 @@ class PostListView(ListView):
             if post.count > 0:
                 date = Replies.objects.filter(post=post).order_by('-date_posted').first().date_posted
                 post.last_reply = date
-                print(date)
             else:
                 post.last_reply = 'Никогда'
         return posts
@@ -138,12 +163,6 @@ class PostDetailView(DetailView):
     model = Post
 
 class PostCreateView(LoginRequiredMixin, CreateView):
-    # model = Post
-    # fields = ['title', 'content']
-    #
-    # def form_valid(self, form):
-    #     form.instance.author = self.request.user
-    #     return super().form_valid(form)
     model = Post
     template_name = 'forum/post_form.html'
     context_object_name = 'post'
@@ -152,21 +171,12 @@ class PostCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         form.instance.author = self.request.user
         form.instance.date_posted = timezone.now()
+        section_id = self.kwargs.get('pk')
+        section = get_object_or_404(Section, id=section_id)
+        form.instance.section = section
         return super().form_valid(form)
 
 class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
-    # model = Post
-    # fields = ['title', 'content']
-    #
-    # def form_valid(self, form):
-    #     form.instance.author = self.request.user
-    #     return super().form_valid(form)
-    #
-    # def test_func(self):
-    #     post = self.get_object()
-    #     if self.request.user == post.author:
-    #         return True
-    #     return False
     model = Post
     template_name = 'forum/post_form.html'
     context_object_name = 'post'
@@ -188,7 +198,6 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         if self.request.user == post.author:
             return True
         return False
-
 
 """
 Ответы
@@ -251,21 +260,15 @@ class RepliesCreateView(LoginRequiredMixin, CreateView):
             form.instance.reply_to = reply
             if self.request.user != reply.author:
                 notify.send(self.request.user, recipient=reply.author, verb="ответил(а) на Ваше сообщение в обсуждении.", action_object=reply.post)
+
+        # obj = form.save(commit=False)
+        # if self.request.FILES:
+        #     for f in self.request.FILES.getlist('attachments'):
+        #         print(f)
+        #         obj = self.model.objects.create(file=f)
+
         # if form.instance.reply_to.post.id != form.instance.post_id:
         #     return redirect('post-detail', pk=form.instance.post_id)
         #form.instance.attachments = self.request.POST.get('attachments')
         return super().form_valid(form)
 
-def search_view(request):
-    object_type = request.GET.get('category')
-    query = request.GET.get('query')
-
-    if object_type == 'tasks':
-        return redirect(f'/user/{request.user.username}/tasks/?query={query}') #'user-tasks', username=request.user.username, query=query
-
-    replies = Replies.objects.filter(reply__icontains=query).order_by('-date_posted')
-    paginator = Paginator(replies, 5)  # Show 25 contacts per page.
-
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
-    return render(request, 'forum/replies_search.html', {'replies': replies, "page_obj": page_obj, "query": query})

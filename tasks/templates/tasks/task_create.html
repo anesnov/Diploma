@@ -2,15 +2,23 @@
 {% load crispy_forms_tags %}
 {% block content %}
     <div class="features data">
-        <h1> Создание задачи </h1>
+        {% if update %}
+            <h1> Изменение задачи </h1>
+        {% else %}
+            <h1> Создание задачи </h1>
+        {% endif %}
         <form method="post">
             {% csrf_token %}
             <br>
             {{ form.title }}<br>
             {{ form.description }}<br>
             {{ form.date_completion }}
+
             <input type="checkbox" id="urgent" name="urgent_check"/>
             <label for="scales">Срочно</label> <br> <br>
+            {% if update %}
+               {{ form.users }} <br>
+            {% endif %}
             {% if error %}
                 <span> {{ error }} </span>
             {% endif %}

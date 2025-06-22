@@ -3,7 +3,11 @@
 
 <article class="media content-section">
     <div class="article-metadata">
-        <h3>{{ post.title }}</h3>
+        <h3>
+            <a class="article-title" href="{% url 'section' post.section.id %}">{{ post.section.name }} </a>
+            >
+            <a class="article-title" href="{% url 'post-detail' post.id %}">{{ post.title }} </a>
+        </h3>
     </div>
     <h4>{{ post.content }}</h4>
 </article>

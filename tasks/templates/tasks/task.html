@@ -33,9 +33,14 @@
 
               <div style="width: 100%;">
                 {% if task.from_user == user or task.to_user == user %}
-                  <a class="btn btn-danger" href="{% url 'task-delete' task.id %}" style="float: right; margin-right: 5px; margin-top: 5px">Удалить</a>
+{#                  <a class="btn btn-danger" href="{% url 'task-delete' task.id %}" style="float: right; margin-right: 5px; margin-top: 5px">Удалить</a>#}
+                  <form action="{% url 'task-delete' task.id %}" method="post" style="float: right; margin-right: 5px; margin-top: 5px" class="del_button">
+                      {% csrf_token %}
+                      <input type="hidden" name="id" value="{{ cred.id }}" />
+                      <button type="submit" class="btn btn-danger" onclick="return confirm('Вы хотите удалить эту задачу?');"> Х </button>
+                  </form>
                   {% if task.from_user == user %}
-                      <a class="btn btn-secondary" href="{% url 'task-update' task.id %}" style="float: right; margin-right: 5px; margin-top: 5px">Редактировать</a>
+                      <a class="btn btn-secondary" href="{% url 'task-update' task.id %}" style="float: right; margin-right: 5px; margin-top: 5px">🖊</a>
                   {% endif %}
                   {% if not task.done %}
                       <a class="btn btn-warning" href="{% url 'task-complete' task.id %}?next={{ request.get_full_path |urlencode }}" style="float: right; margin-right: 5px; margin-top: 5px">Выполнить</a>

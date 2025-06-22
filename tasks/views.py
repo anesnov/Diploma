@@ -10,6 +10,7 @@ from  django.utils import timezone
 from notifications.signals import notify
 from twisted.names.client import query
 
+from login_modal.models import Profile
 from .forms import TaskForm
 from .models import Task
 from django.shortcuts import render, get_object_or_404
@@ -49,11 +50,28 @@ class TaskUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     context_object_name = 'task'
     form_class = TaskForm
 
+    def get_context_data(self, **kwargs):
+        context = super(TaskUpdateView, self).get_context_data(**kwargs)
+        context['update'] = True
+        return context
+
     def test_func(self):
         task = self.get_object()
         if self.request.user == task.from_user:
             return True
         return False
+
+    def form_valid(self, form):
+        pid = self.request.POST.get('users')
+        if (pid != ""):
+            profile = get_object_or_404(Profile, id=pid)
+            form.instance.to_user = profile.user
+
+        check = self.request.POST.get('urgent_check')
+        form.instance.is_urgent = check == "on"
+
+        form.save()
+        return super().form_valid(form)
 
 
 class TaskDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
@@ -70,7 +88,7 @@ class UserTaskListView(ListView):
     model = Task
     template_name = 'tasks/user_tasks.html'
     context_object_name = 'tasks'
-    paginate_by = 20
+    paginate_by = 10
 
     def get_context_data(self, **kwargs):
         context = super(UserTaskListView, self).get_context_data(**kwargs)
@@ -118,7 +136,8 @@ class UserTaskListView(ListView):
         # queries = {}
         filters = {}
 
-        # if query is not None:
+        if query is None:
+            query = ""
         #     filters['description__icontains'] = query
         #     queries['title__icontains'] = query
 
@@ -147,7 +166,9 @@ class UserTaskListView(ListView):
             else:
                 q1 = Q(from_user=user, to_user=giver)
                 q2 = Q(from_user=giver, to_user=user)
-            return Task.objects.filter(q1 | q2).filter(**filters, description__icontains=query).order_by('-date_created')
+            queryset =  Task.objects.filter(q1 | q2).filter(**filters, description__icontains=query).order_by('-date_created')
+
+            return queryset
 
         else:
             filters['to_user'] = user
@@ -167,7 +188,9 @@ class UserTaskListView(ListView):
         # if (user == giver):
         #     return Task.objects.filter(to_user=user).order_by('-date_created')
 
-        return Task.objects.filter(**filters, description__icontains=query).order_by('-date_created')
+        queryset = Task.objects.filter(**filters, description__icontains=query).order_by('-date_created')
+
+        return queryset
 
 def add_filters(request, *args, **kwargs):
     pass

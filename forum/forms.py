@@ -1,5 +1,5 @@
 from .models import Post, Replies, SectionTheme, Section
-from django.forms import ModelForm, TextInput, IntegerField, ImageField, FileInput, NumberInput
+from django.forms import ModelForm, TextInput, IntegerField, ImageField, FileInput, NumberInput, FileField
 from django.conf import settings
 
 
@@ -46,6 +46,13 @@ class PostForm(ModelForm):
 
 
 class ReplyForm(ModelForm):
+    # attachments = FileField(widget=TextInput(attrs={
+    #     "name": "images",
+    #     "type": "File",
+    #     "class": "form-control",
+    #     "multiple": "True",
+    # }), label="")
+
     class Meta:
         model = Replies
         fields = ['reply', 'attachments']
