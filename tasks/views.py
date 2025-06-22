@@ -6,6 +6,7 @@ from django.http import HttpResponse
 from django.template.context_processors import request
 
 from django.contrib.auth.models import User
+from django.urls import reverse
 from  django.utils import timezone
 from notifications.signals import notify
 from twisted.names.client import query
@@ -30,6 +31,15 @@ class TaskCreateView(LoginRequiredMixin, CreateView):
     template_name = 'tasks/task_create.html'
     context_object_name = 'task'
     form_class = TaskForm
+
+    def get_success_url(self):
+        # print(self.pk)
+        return reverse('user-tasks', kwargs={'username': self.kwargs.get('username')})
+
+    def get_context_data(self, **kwargs):
+        context = super(TaskCreateView, self).get_context_data(**kwargs)
+        context['recipient'] = get_object_or_404(User, username=self.kwargs.get('username'))
+        return context
 
     def form_valid(self, form):
         form.instance.from_user = self.request.user

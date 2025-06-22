@@ -33,10 +33,11 @@
                 <option value="False">Только невыполненные</option>
             </select>
             <input type="text" class="form-control"  style="width: auto; margin-left: 10px" aria-label="Task search" name="query">
-            <input type="submit" value="Применить фильтры" class="btn btn-success" style="width: auto; margin-left: 10px">
+            <input type="submit" value="Применить фильтры" class="btn btn-primary" style="width: auto; margin-left: 10px">
 {#            <a class="btn btn-success" style="width: auto; margin-left: 10px" href="{% url 'user-tasks-filters' user.username %}">Применить фильтры</a>#}
         </form>
         <a class="btn btn-warning ml-3 mt-2" style="width: auto; margin-left: 10px" href={% url 'user-tasks' username %}>Очистить фильтры</a>
+        <a class="btn btn-success ml-3 mt-2"  style="width: auto; margin-left: 10px" href={% url 'task-create' username %}>+</a>
 {#        {% url 'profile' task.from_user.username %}#}
     </div>
 {#    <h1 class="mb-3">Задачи пользователю {{ view.kwargs.username }} ({{ page_obj.paginator.count }})</h1>#}

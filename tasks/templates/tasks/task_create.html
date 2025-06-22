@@ -6,7 +6,9 @@
             <h1> Изменение задачи </h1>
         {% else %}
             <h1> Создание задачи </h1>
+            <h3>Кому: <a class="article-title mr-2" href="{% url 'profile' recipient %}">{{ recipient.profile }}</a></h3>
         {% endif %}
+
         <form method="post">
             {% csrf_token %}
             <br>

@@ -21,6 +21,10 @@ class Profile(models.Model):
     def full_name(self):
         return f'{self.last_name} {self.first_name} {self.middle_name}'
 
+    @property
+    def name(self):
+        return f'{self.last_name} {self.first_name}'
+
     class Meta:
         verbose_name = "Профиль"
         verbose_name_plural = "Профили"

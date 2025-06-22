@@ -7,9 +7,9 @@
               </div>
               <div style="width: 100%;">
                 <b><small class="text-muted"> Выдал: {{ task.username}}</small></b>
-                <a class="article-title mr-2" href="{% url 'profile' task.from_user.username %}">{{ task.from_user.profile.last_name }} {{ task.from_user.profile.first_name }}</a>
+                <a class="article-title mr-2" href="{% url 'profile' task.from_user.username %}">{{ task.from_user.profile.name }}</a>
                 <b><small class="text-muted"> Кому: {{ task.username}}</small></b>
-                <a class="article-title mr-2" href="{% url 'profile' task.to_user.username %}">{{ task.to_user.profile.last_name }} {{ task.to_user.profile.first_name }}</a>
+                <a class="article-title mr-2" href="{% url 'profile' task.to_user.username %}">{{ task.to_user.profile.name }}</a>
                 <br>
 
                 <b><small class="text-muted"> Выдано: </small></b>
@@ -39,13 +39,15 @@
                       <input type="hidden" name="id" value="{{ cred.id }}" />
                       <button type="submit" class="btn btn-danger" onclick="return confirm('Вы хотите удалить эту задачу?');"> Х </button>
                   </form>
-                  {% if task.from_user == user %}
-                      <a class="btn btn-secondary" href="{% url 'task-update' task.id %}" style="float: right; margin-right: 5px; margin-top: 5px">🖊</a>
-                  {% endif %}
+
                   {% if not task.done %}
                       <a class="btn btn-warning" href="{% url 'task-complete' task.id %}?next={{ request.get_full_path |urlencode }}" style="float: right; margin-right: 5px; margin-top: 5px">Выполнить</a>
                   {% else %}
                       <a class="btn btn-warning" href="{% url 'task-uncomplete' task.id %}?next={{ request.get_full_path |urlencode }}" style="float: right; margin-right: 5px; margin-top: 5px">Отменить выполнение</a>
+                  {% endif %}
+
+                  {% if task.from_user == user %}
+                      <a class="btn btn-secondary" href="{% url 'task-update' task.id %}" style="float: right; margin-right: 5px; margin-top: 5px">🖊</a>
                   {% endif %}
                 {% endif %}
               </div>
