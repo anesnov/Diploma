@@ -51,7 +51,7 @@ class TaskCreateView(LoginRequiredMixin, CreateView):
         form.instance.is_urgent = check == "on"
 
         task = form.save()
-        notify.send(form.instance.from_user, recipient=receiver, verb='назначил(а) Вам задание.', action_object=task)
+        notify.send(form.instance.from_user, recipient=receiver, verb='назначил(а) Вам задачу.', action_object=task)
         return super().form_valid(form)
 
 class TaskUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
@@ -59,6 +59,10 @@ class TaskUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     template_name = 'tasks/task_create.html'
     context_object_name = 'task'
     form_class = TaskForm
+
+    def get_success_url(self):
+        # print(self.pk)
+        return reverse('user-tasks', kwargs={'username': self.kwargs.get('username')})
 
     def get_context_data(self, **kwargs):
         context = super(TaskUpdateView, self).get_context_data(**kwargs)
@@ -72,15 +76,21 @@ class TaskUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         return False
 
     def form_valid(self, form):
-        pid = self.request.POST.get('users')
-        if (pid != ""):
-            profile = get_object_or_404(Profile, id=pid)
-            form.instance.to_user = profile.user
 
         check = self.request.POST.get('urgent_check')
         form.instance.is_urgent = check == "on"
 
-        form.save()
+        pid = self.request.POST.get('users')
+        if (pid != ""):
+            profile = get_object_or_404(Profile, id=pid)
+            recipient = profile.user
+            form.instance.to_user = recipient
+
+            task = form.save()
+            notify.send(self.request.user, recipient=recipient, verb='перенаправил(а) Вам задачу.', action_object=task)
+        else:
+            form.save()
+
         return super().form_valid(form)
 
 
