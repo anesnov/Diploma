@@ -11,7 +11,9 @@
             {% csrf_token %}
             <br>
             {{ form.reply }}<br>
-            {{ form.attachments }}<br>
+            {% if not update %}
+                {{ form.attachments }}<br>
+            {% endif %}
 
             {% if error %}
                 <span> {{ error }} </span>

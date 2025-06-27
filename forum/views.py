@@ -1,16 +1,10 @@
-from lib2to3.fixes.fix_input import context
-
-from django.db.models import Count
+import logging
+from datetime import datetime
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from django.template.context_processors import request
 from notifications.signals import notify
 from django.core.paginator import Paginator
-
-from login_modal.forms import SearchForm
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.contrib.auth.models import User
 from django.views.generic import (
     ListView,
     DetailView,
@@ -22,10 +16,9 @@ from django.views.generic import (
 from .forms import PostForm, ReplyForm, SectionForm, SectionThemeForm
 from .models import *
 from notifications.models import Notification
-from notifications.views import AllNotificationsList
-from django.contrib.contenttypes.models import ContentType
-import chat.models
 
+
+logger = logging.getLogger("forum_logger")
 
 """
 Поиск
@@ -35,10 +28,10 @@ def search_view(request):
     query = request.GET.get('query')
 
     if object_type == 'tasks':
-        return redirect(f'/user/{request.user.username}/tasks/?query={query}') #'user-tasks', username=request.user.username, query=query
+        return redirect(f'/user/{request.user.username}/tasks/?query={query}')
 
     replies = Replies.objects.filter(reply__icontains=query).order_by('-date_posted')
-    paginator = Paginator(replies, 5)  # Show 25 contacts per page.
+    paginator = Paginator(replies, 5)
 
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
@@ -174,6 +167,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
         section_id = self.kwargs.get('pk')
         section = get_object_or_404(Section, id=section_id)
         form.instance.section = section
+        logger.warning(f'{datetime.now()}: {self.request.user} создал обсуждение {form.instance.title}')
         return super().form_valid(form)
 
 class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
@@ -203,7 +197,7 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 Ответы
 """
 
-class RepliesListView(ListView):
+class RepliesListView(LoginRequiredMixin, ListView):
     model = Replies
     template_name = 'forum/replies.html'
     context_object_name = 'replies'
@@ -213,6 +207,7 @@ class RepliesListView(ListView):
     def get_context_data(self, **kwargs):
         context = super(RepliesListView, self).get_context_data(**kwargs)
         context['post'] = get_object_or_404(Post, id=self.kwargs.get('pk'))
+        context['list_view'] = True
         return context
 
     def get_queryset(self):
@@ -260,7 +255,7 @@ class RepliesCreateView(LoginRequiredMixin, CreateView):
             form.instance.reply_to = reply
             if self.request.user != reply.author:
                 notify.send(self.request.user, recipient=reply.author, verb="ответил(а) на Ваше сообщение в обсуждении.", action_object=reply.post)
-
+        logger.warning(f'{datetime.now()}: {form.instance.author} ответил в обсуждении {form.instance.post_id}: {form.instance.reply}')
         # obj = form.save(commit=False)
         # if self.request.FILES:
         #     for f in self.request.FILES.getlist('attachments'):
@@ -272,3 +267,47 @@ class RepliesCreateView(LoginRequiredMixin, CreateView):
         #form.instance.attachments = self.request.POST.get('attachments')
         return super().form_valid(form)
 
+class RepliesUpdateView(LoginRequiredMixin, UpdateView):
+    model = Replies
+    template_name = 'forum/reply_form.html'
+    context_object_name = 'replies'
+    form_class = ReplyForm
+
+    def get_success_url(self):
+        # print(self.pk)
+        return reverse('post-detail', kwargs={'pk': self.kwargs.get('pk')})
+
+    def get_context_data(self, **kwargs):
+        context = super(RepliesUpdateView, self).get_context_data(**kwargs)
+        # reply = self.request.GET.get('reply_to' or None)
+        # if reply is not None:
+        #     context['reply'] = get_object_or_404(Replies, id=reply)
+        #     context['is_reply'] = True
+
+        context['update'] = True
+        return context
+
+    def get_object(self, queryset=None):
+        reply_id = self.kwargs.get('reply_pk')
+        return get_object_or_404(Replies, id=reply_id)
+
+    def form_valid(self, form):
+        reply = self.get_object()
+        logger.warning(f'{datetime.now()}: {form.instance.author} изменил своё сообщение в обсуждении {reply.post_id} с "{reply.reply}" на {form.instance.reply}')
+        return super().form_valid(form)
+
+class ReplyDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Replies
+
+    def get_success_url(self):
+        return reverse('post-detail', kwargs={'pk': self.kwargs.get('pk')})
+
+    def get_object(self, queryset=None):
+        reply_id = self.kwargs.get('reply_pk')
+        return get_object_or_404(Replies, id=reply_id)
+
+    def test_func(self):
+        reply = self.get_object()
+        if self.request.user == reply.author or self.request.user.is_staff:
+            return True
+        return False

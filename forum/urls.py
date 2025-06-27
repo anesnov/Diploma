@@ -17,7 +17,8 @@ from .views import (
     PostDeleteView,
     UserPostListView,
     RepliesListView,
-    sections, RepliesCreateView, replies, SectionCreateView, SectionThemeCreateView, search_view
+    sections, RepliesCreateView, replies, SectionCreateView, SectionThemeCreateView, search_view, RepliesUpdateView,
+    ReplyDeleteView
 )
 
 urlpatterns = [
@@ -59,9 +60,11 @@ urlpatterns = [
     path('section/<int:pk>/', PostListView.as_view(), name='section'),
     path('section/<int:pk>/new/', PostCreateView.as_view(), name='post-create'),
     path('post/<int:pk>/', RepliesListView.as_view(), name='post-detail'), #replies
-    path('post/<int:pk>/reply/', RepliesCreateView.as_view(), name='reply-create'),
     path('post/<int:pk>/update/', PostUpdateView.as_view(), name='post-update'),
     path('post/<int:pk>/delete/', PostDeleteView.as_view(), name='post-delete'),
+    path('post/<int:pk>/reply/', RepliesCreateView.as_view(), name='reply-create'),
+    path('post/<int:pk>/reply/<int:reply_pk>/update/', RepliesUpdateView.as_view(), name='reply-update'),
+    path('post/<int:pk>/reply/<int:reply_pk>/delete/', ReplyDeleteView.as_view(), name='reply-delete'),
 ]
 
 router = DefaultRouter()

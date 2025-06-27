@@ -1,3 +1,5 @@
+import logging
+from datetime import datetime
 from django.contrib.admin import action
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
@@ -26,6 +28,9 @@ from django.views.generic import (
 from rest_framework import viewsets, permissions
 from .serializers import TaskSerializer
 
+
+logger = logging.getLogger("forum_logger")
+
 class TaskCreateView(LoginRequiredMixin, CreateView):
     model = Task
     template_name = 'tasks/task_create.html'
@@ -52,6 +57,7 @@ class TaskCreateView(LoginRequiredMixin, CreateView):
 
         task = form.save()
         notify.send(form.instance.from_user, recipient=receiver, verb='назначил(а) Вам задачу.', action_object=task)
+        logger.warning(f'{datetime.now()}: {receiver} получил задачу от {self.request.user}')
         return super().form_valid(form)
 
 class TaskUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
@@ -88,7 +94,9 @@ class TaskUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
             task = form.save()
             notify.send(self.request.user, recipient=recipient, verb='перенаправил(а) Вам задачу.', action_object=task)
+            logger.warning(f'{datetime.now()}: {self.request.user} перенаправил задачу {form.instance.id} пользователю {recipient}')
         else:
+            logger.warning(f'{datetime.now()}: {self.request.user} изменил задачу {form.instance.id}')
             form.save()
 
         return super().form_valid(form)
@@ -101,6 +109,7 @@ class TaskDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def test_func(self):
         task = self.get_object()
         if self.request.user == task.from_user:
+            logger.warning(f'{datetime.now()}: {self.request.user} удалил задачу')
             return True
         return False
 
@@ -148,12 +157,11 @@ class UserTaskListView(ListView):
         return context
 
     def get_queryset(self):
-        user = get_object_or_404(User, username=self.kwargs.get('username'))
-        giver = self.request.user
+        profile_user = get_object_or_404(User, username=self.kwargs.get('username'))
+        request_user = self.request.user
         filter = self.request.GET.get('filter_select')
         is_done = self.request.GET.get('is_done_select')
         query = self.request.GET.get('query')
-        # queries = {}
         filters = {}
 
         if query is None:
@@ -166,32 +174,32 @@ class UserTaskListView(ListView):
             filters['done'] = done
 
         if filter == "incoming":
-            if (user == giver):
-                filters['to_user'] = giver
+            if profile_user == request_user or request_user.is_staff:
+                filters['to_user'] = profile_user
             else:
-                filters['from_user'] = giver
-                filters['to_user'] = user
+                filters['from_user'] = request_user
+                filters['to_user'] = profile_user
 
         elif filter == "outgoing":
-            if (user == giver):
-                filters['from_user'] = giver
+            if profile_user == request_user or request_user.is_staff:
+                filters['from_user'] = profile_user
             else:
-                filters['from_user'] = user
-                filters['to_user'] = giver
+                filters['from_user'] = profile_user
+                filters['to_user'] = request_user
 
         elif filter == "all":
-            if (user == giver):
-                q1 = Q(from_user=user)
-                q2 = Q(to_user=user)
+            if profile_user == request_user or request_user.is_staff:
+                q1 = Q(from_user=profile_user)
+                q2 = Q(to_user=profile_user)
             else:
-                q1 = Q(from_user=user, to_user=giver)
-                q2 = Q(from_user=giver, to_user=user)
+                q1 = Q(from_user=profile_user, to_user=request_user)
+                q2 = Q(from_user=request_user, to_user=profile_user)
             queryset =  Task.objects.filter(q1 | q2).filter(**filters, description__icontains=query).order_by('-date_created')
 
             return queryset
 
         else:
-            filters['to_user'] = user
+            filters['to_user'] = profile_user
 
         # if self.request.GET.get("filter") == "incoming":
         #

@@ -17,29 +17,11 @@ from .models import Message
 
 import random
 
-# def lobby(request: HttpRequest) -> HttpResponse:
-#     if request.method == 'POST':
-#         username = request.POST.get('username')
-#         if username:
-#             request.session['username'] = username
-#         else:
-#             names = [
-#                 "Horatio", "Benvolio", "Mercutio", "Lysander", "Demetrius", "Sebastian", "Orsino",
-#                 "Malvolio", "Hero", "Bianca", "Gratiano", "Feste", "Antonio", "Lucius", "Puck", "Lucio",
-#                 "Goneril", "Edgar", "Edmund", "Oswald"
-#             ]
-#             request.session['username'] = f"{random.choice(names)}-{hash(datetime.now().timestamp())}"
-#
-#         return redirect('chat')
-#     else:
-#         return render(request, 'lobby.html')
 
 @login_required
 def chat(request: HttpRequest, *args, **kwargs) -> HttpResponse:
-    # if not request.session.get('username'):
-    #     return redirect('lobby')
     request.session['author'] = request.user.username
-    recipient = kwargs.get('username') # User.objects.get(username=kwargs.get('username')). #get_object_or_404(User, username=kwargs.get('username'))
+    recipient = kwargs.get('username')
     request.session['recipient'] = recipient
     recipient = get_object_or_404(User, username=recipient)
     request.session['recipient_name'] = f'{recipient.profile.last_name} {recipient.profile.first_name}'
@@ -49,16 +31,12 @@ def create_message(request: HttpRequest, **kwargs) -> HttpResponse:
     content = request.POST.get("content")
     author = request.session.get("author")
     recipient = request.session.get("recipient")
-    # print(content)
-    # print(username)
-    # print(recipient)
 
     if not author:
         return HttpResponse(status=403)
 
     author = get_object_or_404(User, username=author)
     recipient = get_object_or_404(User, username=recipient)
-    #created_at = datetime.datetime.now()
 
     if content:
         msg = models.Message.objects.create(author=author, recipient=recipient, content=content)
@@ -69,13 +47,10 @@ def create_message(request: HttpRequest, **kwargs) -> HttpResponse:
 
 async def stream_chat_messages(request: HttpRequest, *args, **kwargs) -> StreamingHttpResponse:
     """
-    Streams chat messages to the client as we create messages.
+    Посылает клиенту сообщения при их создании
     """
     async def event_stream():
-        """
-        We use this function to send a continuous stream of data
-        to the connected clients.
-        """
+
         async for message in get_existing_messages():
             yield message
 
@@ -83,16 +58,15 @@ async def stream_chat_messages(request: HttpRequest, *args, **kwargs) -> Streami
         author = await get_author()
         recipient = await get_recipient()
 
-        # Continuously check for new messages
+        # Проверка на наличие новыз сообщений
         while True:
-
             new_messages = models.Message.objects.filter(Q(author=author, recipient=recipient, id__gt=last_id) | Q(author=recipient, recipient=author, id__gt=last_id)).order_by('created_at').values(
                 'id', 'author__profile__last_name', 'author__profile__first_name',  'content', 'created_at'
             )
             async for message in new_messages:
                 yield f"data: {json.dumps(message, default=default)}\n\n"
                 last_id = message['id']
-            await asyncio.sleep(1)  # Adjust sleep time as needed to reduce db queries.
+            await asyncio.sleep(1)
 
     async def get_existing_messages() -> AsyncGenerator:
         author = await get_author()

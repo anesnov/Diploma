@@ -4,7 +4,23 @@
             <a class="article-title" href="{% url 'profile' reply.author.username %}">{{ reply.author.profile.last_name }} {{ reply.author.profile.first_name }}</a><br>
             {% if not is_reply %}
                 <a class="btn btn-success btn-sm mb-1" style="margin-top: 10px" href="{% url 'reply-create' reply.post.id  %}?reply_to={{ reply.id }}">Ответить</a>
+                {% if list_view %}
+                    <div style="display: flex; gap: 0.5rem; padding: 0.5rem; justify-content: center; border-top: 1px solid lightgray;">
+                      {% if reply.author == user or user.is_staff %}
+            {#            <a class="btn btn-danger" href="{% url 'task-delete' task.id %}" style="float: right; margin-right: 5px; margin-top: 5px">Удалить</a>#}
+                        <form action="{% url 'reply-delete' post.id reply.id %}" method="post" style="" class="del_button">
+                            {% csrf_token %}
+                            <input type="hidden" name="id" value="{{ cred.id }}" />
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Вы хотите удалить это сообщение?');"> Х </button>
+                        </form>
+                      {% endif %}
+                      {% if reply.author == user %}
+                          <a class="btn btn-secondary" href="{% url 'reply-update' reply.post_id reply.id %}" style="">🖊</a>
+                      {% endif %}
+                    </div>
+                {% endif %}
             {% endif %}
+
         </div>
 
 {#        style="justify-self: start;"#}
